@@ -147,16 +147,15 @@ fd = open(sys.argv[1], 'r')
 code = ""
 
 for line in fd:
-    code += line.strip()
-
-try:
-    lex.input(code)
-    while True:
-        token = lex.token()
-        if not token: break
-        print(token)
-    print(code)
-    ast = yacc.parse(code)
-    ast.execute()
-except Exception:
-    print("ERROR")
+    code = line.strip()
+    try:
+        lex.input(code)
+        while True:
+            token = lex.token()
+            if not token: break
+            print(token)
+        print(code)
+        ast = yacc.parse(code)
+        ast.execute()
+    except Exception:
+        print("ERROR")

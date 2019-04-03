@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'leftPLUSMINUSleftTIMESDIVIDEDIVIDE LPAREN MINUS MOD NUMBER PLUS PRINT RPAREN TIMES\n    print_smt : PRINT LPAREN expression RPAREN\n    \n    mod_smt : expression MOD factor\n    expression : expression PLUS factor\n                  | expression MINUS factor\n                  | expression TIMES factor\n                  | expression DIVIDE factorexpression : factorfactor : NUMBER'
+_lr_signature = 'leftPLUSMINUSleftTIMESDIVIDEAND CONS DIVIDE EQUAL FALSE GREATER GREATEROREQUAL IN LBRACE LESS LESSOREQUAL LPAREN MINUS MOD NOT NOTEQUAL NUMBER OR PLUS POUND POWER PRINT RBRACE RPAREN SEMICOLON TIMES TRUEstatement : expression SEMICOLON\n         | boolean SEMICOLON\n    expression : expression PLUS factor\n                  | expression MINUS factor\n                  | expression TIMES factor\n                  | expression DIVIDE factor expression : factorfactor : NUMBER\n    boolean : boolean AND boolean\n        | boolean OR boolean\n    boolean : NOT boolean\n    boolean : TRUE\n        | FALSE\n    '
     
-_lr_action_items = {'PRINT':([0,],[2,]),'$end':([1,7,],[0,-1,]),'LPAREN':([2,],[3,]),'NUMBER':([3,8,9,10,11,],[6,6,6,6,6,]),'RPAREN':([4,5,6,12,13,14,15,],[7,-7,-8,-3,-4,-5,-6,]),'PLUS':([4,5,6,12,13,14,15,],[8,-7,-8,-3,-4,-5,-6,]),'MINUS':([4,5,6,12,13,14,15,],[9,-7,-8,-3,-4,-5,-6,]),'TIMES':([4,5,6,12,13,14,15,],[10,-7,-8,-3,-4,-5,-6,]),'DIVIDE':([4,5,6,12,13,14,15,],[11,-7,-8,-3,-4,-5,-6,]),}
+_lr_action_items = {'NOT':([0,5,15,16,],[5,5,5,5,]),'TRUE':([0,5,15,16,],[6,6,6,6,]),'FALSE':([0,5,15,16,],[7,7,7,7,]),'NUMBER':([0,10,11,12,13,],[8,8,8,8,8,]),'$end':([1,9,14,],[0,-1,-2,]),'SEMICOLON':([2,3,4,6,7,8,17,18,19,20,21,22,23,],[9,14,-7,-12,-13,-8,-11,-3,-4,-5,-6,-9,-10,]),'PLUS':([2,4,8,18,19,20,21,],[10,-7,-8,-3,-4,-5,-6,]),'MINUS':([2,4,8,18,19,20,21,],[11,-7,-8,-3,-4,-5,-6,]),'TIMES':([2,4,8,18,19,20,21,],[12,-7,-8,-3,-4,-5,-6,]),'DIVIDE':([2,4,8,18,19,20,21,],[13,-7,-8,-3,-4,-5,-6,]),'AND':([3,6,7,17,22,23,],[15,-12,-13,15,15,15,]),'OR':([3,6,7,17,22,23,],[16,-12,-13,16,16,16,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'print_smt':([0,],[1,]),'expression':([3,],[4,]),'factor':([3,8,9,10,11,],[5,12,13,14,15,]),}
+_lr_goto_items = {'statement':([0,],[1,]),'expression':([0,],[2,]),'boolean':([0,5,15,16,],[3,17,22,23,]),'factor':([0,10,11,12,13,],[4,18,19,20,21,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -26,13 +26,18 @@ for _k, _v in _lr_goto_items.items():
        _lr_goto[_x][_k] = _y
 del _lr_goto_items
 _lr_productions = [
-  ("S' -> print_smt","S'",1,None,None,None),
-  ('print_smt -> PRINT LPAREN expression RPAREN','print_smt',4,'p_print_smt','py_calc_nodes.py',97),
-  ('mod_smt -> expression MOD factor','mod_smt',3,'p_mod_smt','py_calc_nodes.py',103),
-  ('expression -> expression PLUS factor','expression',3,'p_expression_binop','py_calc_nodes.py',108),
-  ('expression -> expression MINUS factor','expression',3,'p_expression_binop','py_calc_nodes.py',109),
-  ('expression -> expression TIMES factor','expression',3,'p_expression_binop','py_calc_nodes.py',110),
-  ('expression -> expression DIVIDE factor','expression',3,'p_expression_binop','py_calc_nodes.py',111),
-  ('expression -> factor','expression',1,'p_expression_factor','py_calc_nodes.py',116),
-  ('factor -> NUMBER','factor',1,'p_factor_number','py_calc_nodes.py',121),
+  ("S' -> statement","S'",1,None,None,None),
+  ('statement -> expression SEMICOLON','statement',2,'p_statement_exp','sbml.py',176),
+  ('statement -> boolean SEMICOLON','statement',2,'p_statement_exp','sbml.py',177),
+  ('expression -> expression PLUS factor','expression',3,'p_expression_op','sbml.py',183),
+  ('expression -> expression MINUS factor','expression',3,'p_expression_op','sbml.py',184),
+  ('expression -> expression TIMES factor','expression',3,'p_expression_op','sbml.py',185),
+  ('expression -> expression DIVIDE factor','expression',3,'p_expression_op','sbml.py',186),
+  ('expression -> factor','expression',1,'p_expression_factor','sbml.py',191),
+  ('factor -> NUMBER','factor',1,'p_factor_number','sbml.py',197),
+  ('boolean -> boolean AND boolean','boolean',3,'p_boolean_op','sbml.py',206),
+  ('boolean -> boolean OR boolean','boolean',3,'p_boolean_op','sbml.py',207),
+  ('boolean -> NOT boolean','boolean',2,'p_boolean_not','sbml.py',212),
+  ('boolean -> TRUE','boolean',1,'p_boolean','sbml.py',217),
+  ('boolean -> FALSE','boolean',1,'p_boolean','sbml.py',218),
 ]

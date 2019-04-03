@@ -1,196 +1,372 @@
 Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 
+Unused terminals:
+
+    CONS
+    EQUAL
+    GREATER
+    GREATEROREQUAL
+    IN
+    LBRACE
+    LESS
+    LESSOREQUAL
+    LPAREN
+    MOD
+    NOTEQUAL
+    POUND
+    POWER
+    PRINT
+    RBRACE
+    RPAREN
+
 Grammar
 
-Rule 0     S' -> print_smt5)
-Rule 1     print_smt -> PRINT LPAREN expression RPAREN
-Rule 2     mod_smt -> expression MOD factor
+Rule 0     S' -> statement
+Rule 1     statement -> expression SEMICOLON
+Rule 2     statement -> boolean SEMICOLON
 Rule 3     expression -> expression PLUS factor
 Rule 4     expression -> expression MINUS factor
 Rule 5     expression -> expression TIMES factor
 Rule 6     expression -> expression DIVIDE factor
 Rule 7     expression -> factor
 Rule 8     factor -> NUMBER
+Rule 9     boolean -> boolean AND boolean
+Rule 10    boolean -> boolean OR boolean
+Rule 11    boolean -> NOT boolean
+Rule 12    boolean -> TRUE
+Rule 13    boolean -> FALSE
 
 Terminals, with rules where they appear
 
+AND                  : 9
+CONS                 : 
 DIVIDE               : 6
-LPAREN               : 1
+EQUAL                : 
+FALSE                : 13
+GREATER              : 
+GREATEROREQUAL       : 
+IN                   : 
+LBRACE               : 
+LESS                 : 
+LESSOREQUAL          : 
+LPAREN               : 
 MINUS                : 4
-MOD                  : 2
+MOD                  : 
+NOT                  : 11
+NOTEQUAL             : 
 NUMBER               : 8
+OR                   : 10
 PLUS                 : 3
-PRINT                : 1
-RPAREN               : 1
+POUND                : 
+POWER                : 
+PRINT                : 
+RBRACE               : 
+RPAREN               : 
+SEMICOLON            : 1 2
 TIMES                : 5
+TRUE                 : 12
 error                : 
 
 Nonterminals, with rules where they appear
 
-expression           : 1 2 3 4 5 6
-factor               : 2 3 4 5 6 7
-mod_smt              :
-print_smt            : 0
+boolean              : 2 9 9 10 10 11
+expression           : 1 3 4 5 6
+factor               : 3 4 5 6 7
+statement            : 0
 
 Parsing method: LALR
 
 state 0
 
-    (0) S' -> . print_smt
-    (1) print_smt -> . PRINT LPAREN expression RPAREN
-
-    PRINT           shift and go to state 2
-
-    print_smt                      shift and go to state 1
-
-state 1
-
-    (0) S' -> print_smt .
-
-
-
-state 2
-
-    (1) print_smt -> PRINT . LPAREN expression RPAREN
-
-    LPAREN          shift and go to state 3
-
-
-state 3
-
-    (1) print_smt -> PRINT LPAREN . expression RPAREN
+    (0) S' -> . statement
+    (1) statement -> . expression SEMICOLON
+    (2) statement -> . boolean SEMICOLON
     (3) expression -> . expression PLUS factor
     (4) expression -> . expression MINUS factor
     (5) expression -> . expression TIMES factor
     (6) expression -> . expression DIVIDE factor
     (7) expression -> . factor
+    (9) boolean -> . boolean AND boolean
+    (10) boolean -> . boolean OR boolean
+    (11) boolean -> . NOT boolean
+    (12) boolean -> . TRUE
+    (13) boolean -> . FALSE
     (8) factor -> . NUMBER
 
-    NUMBER          shift and go to state 6
+    NOT             shift and go to state 5
+    TRUE            shift and go to state 6
+    FALSE           shift and go to state 7
+    NUMBER          shift and go to state 8
 
-    expression                     shift and go to state 4
-    factor                         shift and go to state 5
+    statement                      shift and go to state 1
+    expression                     shift and go to state 2
+    boolean                        shift and go to state 3
+    factor                         shift and go to state 4
 
-state 4
+state 1
 
-    (1) print_smt -> PRINT LPAREN expression . RPAREN
+    (0) S' -> statement .
+
+
+
+state 2
+
+    (1) statement -> expression . SEMICOLON
     (3) expression -> expression . PLUS factor
     (4) expression -> expression . MINUS factor
     (5) expression -> expression . TIMES factor
     (6) expression -> expression . DIVIDE factor
 
-    RPAREN          shift and go to state 7
-    PLUS            shift and go to state 8
-    MINUS           shift and go to state 9
-    TIMES           shift and go to state 10
-    DIVIDE          shift and go to state 11
+    SEMICOLON       shift and go to state 9
+    PLUS            shift and go to state 10
+    MINUS           shift and go to state 11
+    TIMES           shift and go to state 12
+    DIVIDE          shift and go to state 13
 
 
-state 5
+state 3
+
+    (2) statement -> boolean . SEMICOLON
+    (9) boolean -> boolean . AND boolean
+    (10) boolean -> boolean . OR boolean
+
+    SEMICOLON       shift and go to state 14
+    AND             shift and go to state 15
+    OR              shift and go to state 16
+
+
+state 4
 
     (7) expression -> factor .
 
-    RPAREN          reduce using rule 7 (expression -> factor .)
+    SEMICOLON       reduce using rule 7 (expression -> factor .)
     PLUS            reduce using rule 7 (expression -> factor .)
     MINUS           reduce using rule 7 (expression -> factor .)
     TIMES           reduce using rule 7 (expression -> factor .)
     DIVIDE          reduce using rule 7 (expression -> factor .)
 
 
+state 5
+
+    (11) boolean -> NOT . boolean
+    (9) boolean -> . boolean AND boolean
+    (10) boolean -> . boolean OR boolean
+    (11) boolean -> . NOT boolean
+    (12) boolean -> . TRUE
+    (13) boolean -> . FALSE
+
+    NOT             shift and go to state 5
+    TRUE            shift and go to state 6
+    FALSE           shift and go to state 7
+
+    boolean                        shift and go to state 17
+
 state 6
+
+    (12) boolean -> TRUE .
+
+    SEMICOLON       reduce using rule 12 (boolean -> TRUE .)
+    AND             reduce using rule 12 (boolean -> TRUE .)
+    OR              reduce using rule 12 (boolean -> TRUE .)
+
+
+state 7
+
+    (13) boolean -> FALSE .
+
+    SEMICOLON       reduce using rule 13 (boolean -> FALSE .)
+    AND             reduce using rule 13 (boolean -> FALSE .)
+    OR              reduce using rule 13 (boolean -> FALSE .)
+
+
+state 8
 
     (8) factor -> NUMBER .
 
-    RPAREN          reduce using rule 8 (factor -> NUMBER .)
+    SEMICOLON       reduce using rule 8 (factor -> NUMBER .)
     PLUS            reduce using rule 8 (factor -> NUMBER .)
     MINUS           reduce using rule 8 (factor -> NUMBER .)
     TIMES           reduce using rule 8 (factor -> NUMBER .)
     DIVIDE          reduce using rule 8 (factor -> NUMBER .)
 
 
-state 7
+state 9
 
-    (1) print_smt -> PRINT LPAREN expression RPAREN .
+    (1) statement -> expression SEMICOLON .
 
-    $end            reduce using rule 1 (print_smt -> PRINT LPAREN expression RPAREN .)
+    $end            reduce using rule 1 (statement -> expression SEMICOLON .)
 
 
-state 8
+state 10
 
     (3) expression -> expression PLUS . factor
     (8) factor -> . NUMBER
 
-    NUMBER          shift and go to state 6
+    NUMBER          shift and go to state 8
 
-    factor                         shift and go to state 12
+    factor                         shift and go to state 18
 
-state 9
+state 11
 
     (4) expression -> expression MINUS . factor
     (8) factor -> . NUMBER
 
-    NUMBER          shift and go to state 6
+    NUMBER          shift and go to state 8
 
-    factor                         shift and go to state 13
+    factor                         shift and go to state 19
 
-state 10
+state 12
 
     (5) expression -> expression TIMES . factor
     (8) factor -> . NUMBER
 
-    NUMBER          shift and go to state 6
+    NUMBER          shift and go to state 8
 
-    factor                         shift and go to state 14
+    factor                         shift and go to state 20
 
-state 11
+state 13
 
     (6) expression -> expression DIVIDE . factor
     (8) factor -> . NUMBER
 
-    NUMBER          shift and go to state 6
+    NUMBER          shift and go to state 8
 
-    factor                         shift and go to state 15
+    factor                         shift and go to state 21
 
-state 12
+state 14
+
+    (2) statement -> boolean SEMICOLON .
+
+    $end            reduce using rule 2 (statement -> boolean SEMICOLON .)
+
+
+state 15
+
+    (9) boolean -> boolean AND . boolean
+    (9) boolean -> . boolean AND boolean
+    (10) boolean -> . boolean OR boolean
+    (11) boolean -> . NOT boolean
+    (12) boolean -> . TRUE
+    (13) boolean -> . FALSE
+
+    NOT             shift and go to state 5
+    TRUE            shift and go to state 6
+    FALSE           shift and go to state 7
+
+    boolean                        shift and go to state 22
+
+state 16
+
+    (10) boolean -> boolean OR . boolean
+    (9) boolean -> . boolean AND boolean
+    (10) boolean -> . boolean OR boolean
+    (11) boolean -> . NOT boolean
+    (12) boolean -> . TRUE
+    (13) boolean -> . FALSE
+
+    NOT             shift and go to state 5
+    TRUE            shift and go to state 6
+    FALSE           shift and go to state 7
+
+    boolean                        shift and go to state 23
+
+state 17
+
+    (11) boolean -> NOT boolean .
+    (9) boolean -> boolean . AND boolean
+    (10) boolean -> boolean . OR boolean
+
+  ! shift/reduce conflict for AND resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+    SEMICOLON       reduce using rule 11 (boolean -> NOT boolean .)
+    AND             shift and go to state 15
+    OR              shift and go to state 16
+
+  ! AND             [ reduce using rule 11 (boolean -> NOT boolean .) ]
+  ! OR              [ reduce using rule 11 (boolean -> NOT boolean .) ]
+
+
+state 18
 
     (3) expression -> expression PLUS factor .
 
-    RPAREN          reduce using rule 3 (expression -> expression PLUS factor .)
+    SEMICOLON       reduce using rule 3 (expression -> expression PLUS factor .)
     PLUS            reduce using rule 3 (expression -> expression PLUS factor .)
     MINUS           reduce using rule 3 (expression -> expression PLUS factor .)
     TIMES           reduce using rule 3 (expression -> expression PLUS factor .)
     DIVIDE          reduce using rule 3 (expression -> expression PLUS factor .)
 
 
-state 13
+state 19
 
     (4) expression -> expression MINUS factor .
 
-    RPAREN          reduce using rule 4 (expression -> expression MINUS factor .)
+    SEMICOLON       reduce using rule 4 (expression -> expression MINUS factor .)
     PLUS            reduce using rule 4 (expression -> expression MINUS factor .)
     MINUS           reduce using rule 4 (expression -> expression MINUS factor .)
     TIMES           reduce using rule 4 (expression -> expression MINUS factor .)
     DIVIDE          reduce using rule 4 (expression -> expression MINUS factor .)
 
 
-state 14
+state 20
 
     (5) expression -> expression TIMES factor .
 
-    RPAREN          reduce using rule 5 (expression -> expression TIMES factor .)
+    SEMICOLON       reduce using rule 5 (expression -> expression TIMES factor .)
     PLUS            reduce using rule 5 (expression -> expression TIMES factor .)
     MINUS           reduce using rule 5 (expression -> expression TIMES factor .)
     TIMES           reduce using rule 5 (expression -> expression TIMES factor .)
     DIVIDE          reduce using rule 5 (expression -> expression TIMES factor .)
 
 
-state 15
+state 21
 
     (6) expression -> expression DIVIDE factor .
 
-    RPAREN          reduce using rule 6 (expression -> expression DIVIDE factor .)
+    SEMICOLON       reduce using rule 6 (expression -> expression DIVIDE factor .)
     PLUS            reduce using rule 6 (expression -> expression DIVIDE factor .)
     MINUS           reduce using rule 6 (expression -> expression DIVIDE factor .)
     TIMES           reduce using rule 6 (expression -> expression DIVIDE factor .)
     DIVIDE          reduce using rule 6 (expression -> expression DIVIDE factor .)
 
+
+state 22
+
+    (9) boolean -> boolean AND boolean .
+    (9) boolean -> boolean . AND boolean
+    (10) boolean -> boolean . OR boolean
+
+  ! shift/reduce conflict for AND resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+    SEMICOLON       reduce using rule 9 (boolean -> boolean AND boolean .)
+    AND             shift and go to state 15
+    OR              shift and go to state 16
+
+  ! AND             [ reduce using rule 9 (boolean -> boolean AND boolean .) ]
+  ! OR              [ reduce using rule 9 (boolean -> boolean AND boolean .) ]
+
+
+state 23
+
+    (10) boolean -> boolean OR boolean .
+    (9) boolean -> boolean . AND boolean
+    (10) boolean -> boolean . OR boolean
+
+  ! shift/reduce conflict for AND resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+    SEMICOLON       reduce using rule 10 (boolean -> boolean OR boolean .)
+    AND             shift and go to state 15
+    OR              shift and go to state 16
+
+  ! AND             [ reduce using rule 10 (boolean -> boolean OR boolean .) ]
+  ! OR              [ reduce using rule 10 (boolean -> boolean OR boolean .) ]
+
+WARNING: 
+WARNING: Conflicts:
+WARNING: 
+WARNING: shift/reduce conflict for AND in state 17 resolved as shift
+WARNING: shift/reduce conflict for OR in state 17 resolved as shift
+WARNING: shift/reduce conflict for AND in state 22 resolved as shift
+WARNING: shift/reduce conflict for OR in state 22 resolved as shift
+WARNING: shift/reduce conflict for AND in state 23 resolved as shift
+WARNING: shift/reduce conflict for OR in state 23 resolved as shift
