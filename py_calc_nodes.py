@@ -73,6 +73,7 @@ t_MOD = 'mod'
 def t_NUMBER(t):
     r'-?\d*(\d\.|\.\d)\d* | \d+'
     try:
+        print(t.value)
         t.value = NumberNode(t.value)
     except ValueError:
         print("Integer value too large %d", t.value)
