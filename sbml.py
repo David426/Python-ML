@@ -23,6 +23,19 @@ class NumberNode(Node):
         return self.value
 
 
+class NegateNode(Node):
+    def __init__(self, v):
+        self.value = v
+    def evaluate(self):
+        return self.value.evaluate() * -1
+
+class EOPNode(Node):
+    def __init__(self, v1, v2):
+        self.v1 = v1
+        self.v2 = v2
+    def evaluate(self):
+        return self.v1.evaluate() * (10 ** self.v2.evaluate())
+
 class ExecuteStatmentNode(Node):
     def __init__(self, v):
         self.value = v
@@ -47,6 +60,29 @@ class OpNode(Node):
             return self.v1.evaluate() * self.v2.evaluate()
         elif (self.op == '/'):
             return self.v1.evaluate() / self.v2.evaluate()
+        elif (self.op == 'mod'):
+            return self.v1.evaluate() % self.v2.evaluate()
+        elif (self.op == '**'):
+            return self.v1.evaluate() ** self.v2.evaluate()
+
+
+
+class NumberComparisonNode(Node):
+    def __init__(self, op, v1, v2):
+        self.v1 = v1
+        self.v2 = v2
+        self.op = op
+
+    def evaluate(self):
+        if (self.op == '>'):
+            return self.v1.evaluate() > self.v2.evaluate()
+        elif (self.op == '<'):
+            return self.v1.evaluate() < self.v2.evaluate()
+        elif (self.op == '>='):
+            return self.v1.evaluate() >= self.v2.evaluate()
+        elif (self.op == '<='):
+            return self.v1.evaluate() <= self.v2.evaluate()
+
 
 class BooleanNode(Node):
     def __init__(self, v):
@@ -103,7 +139,7 @@ reserved = {
 
 tokens = [
     'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'SEMICOLON',
-    'NUMBER',
+    'NUMBER', 'EOP',
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'POWER', 'CONS', 'POUND',
     'GREATER', 'LESS', 'EQUAL', 'GREATEROREQUAL', 'LESSOREQUAL', 'NOTEQUAL'
 ] + list(reserved.values())
@@ -133,6 +169,7 @@ t_EQUAL = r'=='
 t_GREATEROREQUAL = r'>='
 t_LESSOREQUAL = r'<='
 t_NOTEQUAL = r'<>'
+t_EOP = r'e'
 
 def t_TRUE(t):
     'True'
@@ -167,9 +204,13 @@ lex.lex()
 # -------------------------------------------
 
 precedence = (
-    ('left', 'PLUS', 'MINUS'),
-    ('left', 'TIMES', 'DIVIDE')
+    # ('left', 'SEMICOLON'),
+    ('left', 'PLUS', 'MINUS', 'OR'),
+    ('left', 'TIMES', 'DIVIDE', 'AND', 'NOT'),
+    ('left', 'EOP'),
+    ('right', 'UMINUS')
 )
+
 def p_statement_exp(t):
     '''statement : expression SEMICOLON
          | boolean SEMICOLON
@@ -181,24 +222,39 @@ def p_expression_op(t):
     '''expression : expression PLUS factor
                   | expression MINUS factor
                   | expression TIMES factor
-                  | expression DIVIDE factor '''
+                  | expression DIVIDE factor
+                  | expression MOD factor
+                  | expression POWER factor
+                   '''
     t[0] = OpNode(t[2], t[1], t[3])
 
+
+def p_expr_uminus(t):
+    'expression : MINUS expression %prec UMINUS'
+    t[0] = NegateNode(t[2])
+
+def p_EOP(t):
+    '''expression : expression EOP expression'''
+    t[0] = EOPNode(t[1], t[3])
 
 def p_expression_factor(t):
     '''expression : factor'''
     t[0] = t[1]
 
 
-
 def p_factor_number(t):
     'factor : NUMBER'
     t[0] = t[1]
 
-# def p_factor_expression(t):
-#     'factor : LPAREN expression RPAREN'
-#     t[0] = t[2]
-#
+def p_comparison_numbers(t):
+    '''
+    boolean : expression GREATER factor
+            | expression LESS factor
+            | expression GREATEROREQUAL factor
+            | expression LESSOREQUAL factor
+    '''
+    t[0] = NumberComparisonNode(t[2], t[1], t[3])
+
 def p_boolean_op(t):
     '''
     boolean : boolean AND boolean

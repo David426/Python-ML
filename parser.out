@@ -4,17 +4,11 @@ Unused terminals:
 
     CONS
     EQUAL
-    GREATER
-    GREATEROREQUAL
     IN
     LBRACE
-    LESS
-    LESSOREQUAL
     LPAREN
-    MOD
     NOTEQUAL
     POUND
-    POWER
     PRINT
     RBRACE
     RPAREN
@@ -28,50 +22,59 @@ Rule 3     expression -> expression PLUS factor
 Rule 4     expression -> expression MINUS factor
 Rule 5     expression -> expression TIMES factor
 Rule 6     expression -> expression DIVIDE factor
-Rule 7     expression -> factor
-Rule 8     factor -> NUMBER
-Rule 9     boolean -> boolean AND boolean
-Rule 10    boolean -> boolean OR boolean
-Rule 11    boolean -> NOT boolean
-Rule 12    boolean -> TRUE
-Rule 13    boolean -> FALSE
+Rule 7     expression -> expression MOD factor
+Rule 8     expression -> expression POWER factor
+Rule 9     expression -> MINUS expression
+Rule 10    expression -> expression EOP expression
+Rule 11    expression -> factor
+Rule 12    factor -> NUMBER
+Rule 13    boolean -> expression GREATER factor
+Rule 14    boolean -> expression LESS factor
+Rule 15    boolean -> expression GREATEROREQUAL factor
+Rule 16    boolean -> expression LESSOREQUAL factor
+Rule 17    boolean -> boolean AND boolean
+Rule 18    boolean -> boolean OR boolean
+Rule 19    boolean -> NOT boolean
+Rule 20    boolean -> TRUE
+Rule 21    boolean -> FALSE
 
 Terminals, with rules where they appear
 
-AND                  : 9
+AND                  : 17
 CONS                 : 
 DIVIDE               : 6
+EOP                  : 10
 EQUAL                : 
-FALSE                : 13
-GREATER              : 
-GREATEROREQUAL       : 
+FALSE                : 21
+GREATER              : 13
+GREATEROREQUAL       : 15
 IN                   : 
 LBRACE               : 
-LESS                 : 
-LESSOREQUAL          : 
+LESS                 : 14
+LESSOREQUAL          : 16
 LPAREN               : 
-MINUS                : 4
-MOD                  : 
-NOT                  : 11
+MINUS                : 4 9
+MOD                  : 7
+NOT                  : 19
 NOTEQUAL             : 
-NUMBER               : 8
-OR                   : 10
+NUMBER               : 12
+OR                   : 18
 PLUS                 : 3
 POUND                : 
-POWER                : 
+POWER                : 8
 PRINT                : 
 RBRACE               : 
 RPAREN               : 
 SEMICOLON            : 1 2
 TIMES                : 5
-TRUE                 : 12
+TRUE                 : 20
 error                : 
 
 Nonterminals, with rules where they appear
 
-boolean              : 2 9 9 10 10 11
-expression           : 1 3 4 5 6
-factor               : 3 4 5 6 7
+boolean              : 2 17 17 18 18 19
+expression           : 1 3 4 5 6 7 8 9 10 10 13 14 15 16
+factor               : 3 4 5 6 7 8 11 13 14 15 16
 statement            : 0
 
 Parsing method: LALR
@@ -85,18 +88,27 @@ state 0
     (4) expression -> . expression MINUS factor
     (5) expression -> . expression TIMES factor
     (6) expression -> . expression DIVIDE factor
-    (7) expression -> . factor
-    (9) boolean -> . boolean AND boolean
-    (10) boolean -> . boolean OR boolean
-    (11) boolean -> . NOT boolean
-    (12) boolean -> . TRUE
-    (13) boolean -> . FALSE
-    (8) factor -> . NUMBER
+    (7) expression -> . expression MOD factor
+    (8) expression -> . expression POWER factor
+    (9) expression -> . MINUS expression
+    (10) expression -> . expression EOP expression
+    (11) expression -> . factor
+    (13) boolean -> . expression GREATER factor
+    (14) boolean -> . expression LESS factor
+    (15) boolean -> . expression GREATEROREQUAL factor
+    (16) boolean -> . expression LESSOREQUAL factor
+    (17) boolean -> . boolean AND boolean
+    (18) boolean -> . boolean OR boolean
+    (19) boolean -> . NOT boolean
+    (20) boolean -> . TRUE
+    (21) boolean -> . FALSE
+    (12) factor -> . NUMBER
 
-    NOT             shift and go to state 5
-    TRUE            shift and go to state 6
-    FALSE           shift and go to state 7
-    NUMBER          shift and go to state 8
+    MINUS           shift and go to state 5
+    NOT             shift and go to state 6
+    TRUE            shift and go to state 7
+    FALSE           shift and go to state 8
+    NUMBER          shift and go to state 9
 
     statement                      shift and go to state 1
     expression                     shift and go to state 2
@@ -116,177 +128,413 @@ state 2
     (4) expression -> expression . MINUS factor
     (5) expression -> expression . TIMES factor
     (6) expression -> expression . DIVIDE factor
+    (7) expression -> expression . MOD factor
+    (8) expression -> expression . POWER factor
+    (10) expression -> expression . EOP expression
+    (13) boolean -> expression . GREATER factor
+    (14) boolean -> expression . LESS factor
+    (15) boolean -> expression . GREATEROREQUAL factor
+    (16) boolean -> expression . LESSOREQUAL factor
 
-    SEMICOLON       shift and go to state 9
-    PLUS            shift and go to state 10
-    MINUS           shift and go to state 11
-    TIMES           shift and go to state 12
-    DIVIDE          shift and go to state 13
+    SEMICOLON       shift and go to state 10
+    PLUS            shift and go to state 11
+    MINUS           shift and go to state 12
+    TIMES           shift and go to state 13
+    DIVIDE          shift and go to state 14
+    MOD             shift and go to state 15
+    POWER           shift and go to state 16
+    EOP             shift and go to state 17
+    GREATER         shift and go to state 18
+    LESS            shift and go to state 19
+    GREATEROREQUAL  shift and go to state 20
+    LESSOREQUAL     shift and go to state 21
 
 
 state 3
 
     (2) statement -> boolean . SEMICOLON
-    (9) boolean -> boolean . AND boolean
-    (10) boolean -> boolean . OR boolean
+    (17) boolean -> boolean . AND boolean
+    (18) boolean -> boolean . OR boolean
 
-    SEMICOLON       shift and go to state 14
-    AND             shift and go to state 15
-    OR              shift and go to state 16
+    SEMICOLON       shift and go to state 22
+    AND             shift and go to state 23
+    OR              shift and go to state 24
 
 
 state 4
 
-    (7) expression -> factor .
+    (11) expression -> factor .
 
-    SEMICOLON       reduce using rule 7 (expression -> factor .)
-    PLUS            reduce using rule 7 (expression -> factor .)
-    MINUS           reduce using rule 7 (expression -> factor .)
-    TIMES           reduce using rule 7 (expression -> factor .)
-    DIVIDE          reduce using rule 7 (expression -> factor .)
+    SEMICOLON       reduce using rule 11 (expression -> factor .)
+    PLUS            reduce using rule 11 (expression -> factor .)
+    MINUS           reduce using rule 11 (expression -> factor .)
+    TIMES           reduce using rule 11 (expression -> factor .)
+    DIVIDE          reduce using rule 11 (expression -> factor .)
+    MOD             reduce using rule 11 (expression -> factor .)
+    POWER           reduce using rule 11 (expression -> factor .)
+    EOP             reduce using rule 11 (expression -> factor .)
+    GREATER         reduce using rule 11 (expression -> factor .)
+    LESS            reduce using rule 11 (expression -> factor .)
+    GREATEROREQUAL  reduce using rule 11 (expression -> factor .)
+    LESSOREQUAL     reduce using rule 11 (expression -> factor .)
 
 
 state 5
 
-    (11) boolean -> NOT . boolean
-    (9) boolean -> . boolean AND boolean
-    (10) boolean -> . boolean OR boolean
-    (11) boolean -> . NOT boolean
-    (12) boolean -> . TRUE
-    (13) boolean -> . FALSE
+    (9) expression -> MINUS . expression
+    (3) expression -> . expression PLUS factor
+    (4) expression -> . expression MINUS factor
+    (5) expression -> . expression TIMES factor
+    (6) expression -> . expression DIVIDE factor
+    (7) expression -> . expression MOD factor
+    (8) expression -> . expression POWER factor
+    (9) expression -> . MINUS expression
+    (10) expression -> . expression EOP expression
+    (11) expression -> . factor
+    (12) factor -> . NUMBER
 
-    NOT             shift and go to state 5
-    TRUE            shift and go to state 6
-    FALSE           shift and go to state 7
+    MINUS           shift and go to state 5
+    NUMBER          shift and go to state 9
 
-    boolean                        shift and go to state 17
+    expression                     shift and go to state 25
+    factor                         shift and go to state 4
 
 state 6
 
-    (12) boolean -> TRUE .
+    (19) boolean -> NOT . boolean
+    (13) boolean -> . expression GREATER factor
+    (14) boolean -> . expression LESS factor
+    (15) boolean -> . expression GREATEROREQUAL factor
+    (16) boolean -> . expression LESSOREQUAL factor
+    (17) boolean -> . boolean AND boolean
+    (18) boolean -> . boolean OR boolean
+    (19) boolean -> . NOT boolean
+    (20) boolean -> . TRUE
+    (21) boolean -> . FALSE
+    (3) expression -> . expression PLUS factor
+    (4) expression -> . expression MINUS factor
+    (5) expression -> . expression TIMES factor
+    (6) expression -> . expression DIVIDE factor
+    (7) expression -> . expression MOD factor
+    (8) expression -> . expression POWER factor
+    (9) expression -> . MINUS expression
+    (10) expression -> . expression EOP expression
+    (11) expression -> . factor
+    (12) factor -> . NUMBER
 
-    SEMICOLON       reduce using rule 12 (boolean -> TRUE .)
-    AND             reduce using rule 12 (boolean -> TRUE .)
-    OR              reduce using rule 12 (boolean -> TRUE .)
+    NOT             shift and go to state 6
+    TRUE            shift and go to state 7
+    FALSE           shift and go to state 8
+    MINUS           shift and go to state 5
+    NUMBER          shift and go to state 9
 
+    boolean                        shift and go to state 26
+    expression                     shift and go to state 27
+    factor                         shift and go to state 4
 
 state 7
 
-    (13) boolean -> FALSE .
+    (20) boolean -> TRUE .
 
-    SEMICOLON       reduce using rule 13 (boolean -> FALSE .)
-    AND             reduce using rule 13 (boolean -> FALSE .)
-    OR              reduce using rule 13 (boolean -> FALSE .)
+    SEMICOLON       reduce using rule 20 (boolean -> TRUE .)
+    AND             reduce using rule 20 (boolean -> TRUE .)
+    OR              reduce using rule 20 (boolean -> TRUE .)
 
 
 state 8
 
-    (8) factor -> NUMBER .
+    (21) boolean -> FALSE .
 
-    SEMICOLON       reduce using rule 8 (factor -> NUMBER .)
-    PLUS            reduce using rule 8 (factor -> NUMBER .)
-    MINUS           reduce using rule 8 (factor -> NUMBER .)
-    TIMES           reduce using rule 8 (factor -> NUMBER .)
-    DIVIDE          reduce using rule 8 (factor -> NUMBER .)
+    SEMICOLON       reduce using rule 21 (boolean -> FALSE .)
+    AND             reduce using rule 21 (boolean -> FALSE .)
+    OR              reduce using rule 21 (boolean -> FALSE .)
 
 
 state 9
+
+    (12) factor -> NUMBER .
+
+    SEMICOLON       reduce using rule 12 (factor -> NUMBER .)
+    PLUS            reduce using rule 12 (factor -> NUMBER .)
+    MINUS           reduce using rule 12 (factor -> NUMBER .)
+    TIMES           reduce using rule 12 (factor -> NUMBER .)
+    DIVIDE          reduce using rule 12 (factor -> NUMBER .)
+    MOD             reduce using rule 12 (factor -> NUMBER .)
+    POWER           reduce using rule 12 (factor -> NUMBER .)
+    EOP             reduce using rule 12 (factor -> NUMBER .)
+    GREATER         reduce using rule 12 (factor -> NUMBER .)
+    LESS            reduce using rule 12 (factor -> NUMBER .)
+    GREATEROREQUAL  reduce using rule 12 (factor -> NUMBER .)
+    LESSOREQUAL     reduce using rule 12 (factor -> NUMBER .)
+    AND             reduce using rule 12 (factor -> NUMBER .)
+    OR              reduce using rule 12 (factor -> NUMBER .)
+
+
+state 10
 
     (1) statement -> expression SEMICOLON .
 
     $end            reduce using rule 1 (statement -> expression SEMICOLON .)
 
 
-state 10
-
-    (3) expression -> expression PLUS . factor
-    (8) factor -> . NUMBER
-
-    NUMBER          shift and go to state 8
-
-    factor                         shift and go to state 18
-
 state 11
 
-    (4) expression -> expression MINUS . factor
-    (8) factor -> . NUMBER
+    (3) expression -> expression PLUS . factor
+    (12) factor -> . NUMBER
 
-    NUMBER          shift and go to state 8
+    NUMBER          shift and go to state 9
 
-    factor                         shift and go to state 19
+    factor                         shift and go to state 28
 
 state 12
 
-    (5) expression -> expression TIMES . factor
-    (8) factor -> . NUMBER
+    (4) expression -> expression MINUS . factor
+    (12) factor -> . NUMBER
 
-    NUMBER          shift and go to state 8
+    NUMBER          shift and go to state 9
 
-    factor                         shift and go to state 20
+    factor                         shift and go to state 29
 
 state 13
 
-    (6) expression -> expression DIVIDE . factor
-    (8) factor -> . NUMBER
+    (5) expression -> expression TIMES . factor
+    (12) factor -> . NUMBER
 
-    NUMBER          shift and go to state 8
+    NUMBER          shift and go to state 9
 
-    factor                         shift and go to state 21
+    factor                         shift and go to state 30
 
 state 14
+
+    (6) expression -> expression DIVIDE . factor
+    (12) factor -> . NUMBER
+
+    NUMBER          shift and go to state 9
+
+    factor                         shift and go to state 31
+
+state 15
+
+    (7) expression -> expression MOD . factor
+    (12) factor -> . NUMBER
+
+    NUMBER          shift and go to state 9
+
+    factor                         shift and go to state 32
+
+state 16
+
+    (8) expression -> expression POWER . factor
+    (12) factor -> . NUMBER
+
+    NUMBER          shift and go to state 9
+
+    factor                         shift and go to state 33
+
+state 17
+
+    (10) expression -> expression EOP . expression
+    (3) expression -> . expression PLUS factor
+    (4) expression -> . expression MINUS factor
+    (5) expression -> . expression TIMES factor
+    (6) expression -> . expression DIVIDE factor
+    (7) expression -> . expression MOD factor
+    (8) expression -> . expression POWER factor
+    (9) expression -> . MINUS expression
+    (10) expression -> . expression EOP expression
+    (11) expression -> . factor
+    (12) factor -> . NUMBER
+
+    MINUS           shift and go to state 5
+    NUMBER          shift and go to state 9
+
+    expression                     shift and go to state 34
+    factor                         shift and go to state 4
+
+state 18
+
+    (13) boolean -> expression GREATER . factor
+    (12) factor -> . NUMBER
+
+    NUMBER          shift and go to state 9
+
+    factor                         shift and go to state 35
+
+state 19
+
+    (14) boolean -> expression LESS . factor
+    (12) factor -> . NUMBER
+
+    NUMBER          shift and go to state 9
+
+    factor                         shift and go to state 36
+
+state 20
+
+    (15) boolean -> expression GREATEROREQUAL . factor
+    (12) factor -> . NUMBER
+
+    NUMBER          shift and go to state 9
+
+    factor                         shift and go to state 37
+
+state 21
+
+    (16) boolean -> expression LESSOREQUAL . factor
+    (12) factor -> . NUMBER
+
+    NUMBER          shift and go to state 9
+
+    factor                         shift and go to state 38
+
+state 22
 
     (2) statement -> boolean SEMICOLON .
 
     $end            reduce using rule 2 (statement -> boolean SEMICOLON .)
 
 
-state 15
+state 23
 
-    (9) boolean -> boolean AND . boolean
-    (9) boolean -> . boolean AND boolean
-    (10) boolean -> . boolean OR boolean
-    (11) boolean -> . NOT boolean
-    (12) boolean -> . TRUE
-    (13) boolean -> . FALSE
+    (17) boolean -> boolean AND . boolean
+    (13) boolean -> . expression GREATER factor
+    (14) boolean -> . expression LESS factor
+    (15) boolean -> . expression GREATEROREQUAL factor
+    (16) boolean -> . expression LESSOREQUAL factor
+    (17) boolean -> . boolean AND boolean
+    (18) boolean -> . boolean OR boolean
+    (19) boolean -> . NOT boolean
+    (20) boolean -> . TRUE
+    (21) boolean -> . FALSE
+    (3) expression -> . expression PLUS factor
+    (4) expression -> . expression MINUS factor
+    (5) expression -> . expression TIMES factor
+    (6) expression -> . expression DIVIDE factor
+    (7) expression -> . expression MOD factor
+    (8) expression -> . expression POWER factor
+    (9) expression -> . MINUS expression
+    (10) expression -> . expression EOP expression
+    (11) expression -> . factor
+    (12) factor -> . NUMBER
 
-    NOT             shift and go to state 5
-    TRUE            shift and go to state 6
-    FALSE           shift and go to state 7
+    NOT             shift and go to state 6
+    TRUE            shift and go to state 7
+    FALSE           shift and go to state 8
+    MINUS           shift and go to state 5
+    NUMBER          shift and go to state 9
 
-    boolean                        shift and go to state 22
+    boolean                        shift and go to state 39
+    expression                     shift and go to state 27
+    factor                         shift and go to state 4
 
-state 16
+state 24
 
-    (10) boolean -> boolean OR . boolean
-    (9) boolean -> . boolean AND boolean
-    (10) boolean -> . boolean OR boolean
-    (11) boolean -> . NOT boolean
-    (12) boolean -> . TRUE
-    (13) boolean -> . FALSE
+    (18) boolean -> boolean OR . boolean
+    (13) boolean -> . expression GREATER factor
+    (14) boolean -> . expression LESS factor
+    (15) boolean -> . expression GREATEROREQUAL factor
+    (16) boolean -> . expression LESSOREQUAL factor
+    (17) boolean -> . boolean AND boolean
+    (18) boolean -> . boolean OR boolean
+    (19) boolean -> . NOT boolean
+    (20) boolean -> . TRUE
+    (21) boolean -> . FALSE
+    (3) expression -> . expression PLUS factor
+    (4) expression -> . expression MINUS factor
+    (5) expression -> . expression TIMES factor
+    (6) expression -> . expression DIVIDE factor
+    (7) expression -> . expression MOD factor
+    (8) expression -> . expression POWER factor
+    (9) expression -> . MINUS expression
+    (10) expression -> . expression EOP expression
+    (11) expression -> . factor
+    (12) factor -> . NUMBER
 
-    NOT             shift and go to state 5
-    TRUE            shift and go to state 6
-    FALSE           shift and go to state 7
+    NOT             shift and go to state 6
+    TRUE            shift and go to state 7
+    FALSE           shift and go to state 8
+    MINUS           shift and go to state 5
+    NUMBER          shift and go to state 9
 
-    boolean                        shift and go to state 23
+    boolean                        shift and go to state 40
+    expression                     shift and go to state 27
+    factor                         shift and go to state 4
 
-state 17
+state 25
 
-    (11) boolean -> NOT boolean .
-    (9) boolean -> boolean . AND boolean
-    (10) boolean -> boolean . OR boolean
+    (9) expression -> MINUS expression .
+    (3) expression -> expression . PLUS factor
+    (4) expression -> expression . MINUS factor
+    (5) expression -> expression . TIMES factor
+    (6) expression -> expression . DIVIDE factor
+    (7) expression -> expression . MOD factor
+    (8) expression -> expression . POWER factor
+    (10) expression -> expression . EOP expression
 
-  ! shift/reduce conflict for AND resolved as shift
-  ! shift/reduce conflict for OR resolved as shift
-    SEMICOLON       reduce using rule 11 (boolean -> NOT boolean .)
-    AND             shift and go to state 15
-    OR              shift and go to state 16
+    SEMICOLON       reduce using rule 9 (expression -> MINUS expression .)
+    PLUS            reduce using rule 9 (expression -> MINUS expression .)
+    MINUS           reduce using rule 9 (expression -> MINUS expression .)
+    TIMES           reduce using rule 9 (expression -> MINUS expression .)
+    DIVIDE          reduce using rule 9 (expression -> MINUS expression .)
+    MOD             reduce using rule 9 (expression -> MINUS expression .)
+    POWER           reduce using rule 9 (expression -> MINUS expression .)
+    EOP             reduce using rule 9 (expression -> MINUS expression .)
+    GREATER         reduce using rule 9 (expression -> MINUS expression .)
+    LESS            reduce using rule 9 (expression -> MINUS expression .)
+    GREATEROREQUAL  reduce using rule 9 (expression -> MINUS expression .)
+    LESSOREQUAL     reduce using rule 9 (expression -> MINUS expression .)
 
-  ! AND             [ reduce using rule 11 (boolean -> NOT boolean .) ]
-  ! OR              [ reduce using rule 11 (boolean -> NOT boolean .) ]
+  ! PLUS            [ shift and go to state 11 ]
+  ! MINUS           [ shift and go to state 12 ]
+  ! TIMES           [ shift and go to state 13 ]
+  ! DIVIDE          [ shift and go to state 14 ]
+  ! MOD             [ shift and go to state 15 ]
+  ! POWER           [ shift and go to state 16 ]
+  ! EOP             [ shift and go to state 17 ]
 
 
-state 18
+state 26
+
+    (19) boolean -> NOT boolean .
+    (17) boolean -> boolean . AND boolean
+    (18) boolean -> boolean . OR boolean
+
+    SEMICOLON       reduce using rule 19 (boolean -> NOT boolean .)
+    AND             reduce using rule 19 (boolean -> NOT boolean .)
+    OR              reduce using rule 19 (boolean -> NOT boolean .)
+
+  ! AND             [ shift and go to state 23 ]
+  ! OR              [ shift and go to state 24 ]
+
+
+state 27
+
+    (13) boolean -> expression . GREATER factor
+    (14) boolean -> expression . LESS factor
+    (15) boolean -> expression . GREATEROREQUAL factor
+    (16) boolean -> expression . LESSOREQUAL factor
+    (3) expression -> expression . PLUS factor
+    (4) expression -> expression . MINUS factor
+    (5) expression -> expression . TIMES factor
+    (6) expression -> expression . DIVIDE factor
+    (7) expression -> expression . MOD factor
+    (8) expression -> expression . POWER factor
+    (10) expression -> expression . EOP expression
+
+    GREATER         shift and go to state 18
+    LESS            shift and go to state 19
+    GREATEROREQUAL  shift and go to state 20
+    LESSOREQUAL     shift and go to state 21
+    PLUS            shift and go to state 11
+    MINUS           shift and go to state 12
+    TIMES           shift and go to state 13
+    DIVIDE          shift and go to state 14
+    MOD             shift and go to state 15
+    POWER           shift and go to state 16
+    EOP             shift and go to state 17
+
+
+state 28
 
     (3) expression -> expression PLUS factor .
 
@@ -295,9 +543,16 @@ state 18
     MINUS           reduce using rule 3 (expression -> expression PLUS factor .)
     TIMES           reduce using rule 3 (expression -> expression PLUS factor .)
     DIVIDE          reduce using rule 3 (expression -> expression PLUS factor .)
+    MOD             reduce using rule 3 (expression -> expression PLUS factor .)
+    POWER           reduce using rule 3 (expression -> expression PLUS factor .)
+    EOP             reduce using rule 3 (expression -> expression PLUS factor .)
+    GREATER         reduce using rule 3 (expression -> expression PLUS factor .)
+    LESS            reduce using rule 3 (expression -> expression PLUS factor .)
+    GREATEROREQUAL  reduce using rule 3 (expression -> expression PLUS factor .)
+    LESSOREQUAL     reduce using rule 3 (expression -> expression PLUS factor .)
 
 
-state 19
+state 29
 
     (4) expression -> expression MINUS factor .
 
@@ -306,9 +561,16 @@ state 19
     MINUS           reduce using rule 4 (expression -> expression MINUS factor .)
     TIMES           reduce using rule 4 (expression -> expression MINUS factor .)
     DIVIDE          reduce using rule 4 (expression -> expression MINUS factor .)
+    MOD             reduce using rule 4 (expression -> expression MINUS factor .)
+    POWER           reduce using rule 4 (expression -> expression MINUS factor .)
+    EOP             reduce using rule 4 (expression -> expression MINUS factor .)
+    GREATER         reduce using rule 4 (expression -> expression MINUS factor .)
+    LESS            reduce using rule 4 (expression -> expression MINUS factor .)
+    GREATEROREQUAL  reduce using rule 4 (expression -> expression MINUS factor .)
+    LESSOREQUAL     reduce using rule 4 (expression -> expression MINUS factor .)
 
 
-state 20
+state 30
 
     (5) expression -> expression TIMES factor .
 
@@ -317,9 +579,16 @@ state 20
     MINUS           reduce using rule 5 (expression -> expression TIMES factor .)
     TIMES           reduce using rule 5 (expression -> expression TIMES factor .)
     DIVIDE          reduce using rule 5 (expression -> expression TIMES factor .)
+    MOD             reduce using rule 5 (expression -> expression TIMES factor .)
+    POWER           reduce using rule 5 (expression -> expression TIMES factor .)
+    EOP             reduce using rule 5 (expression -> expression TIMES factor .)
+    GREATER         reduce using rule 5 (expression -> expression TIMES factor .)
+    LESS            reduce using rule 5 (expression -> expression TIMES factor .)
+    GREATEROREQUAL  reduce using rule 5 (expression -> expression TIMES factor .)
+    LESSOREQUAL     reduce using rule 5 (expression -> expression TIMES factor .)
 
 
-state 21
+state 31
 
     (6) expression -> expression DIVIDE factor .
 
@@ -328,45 +597,144 @@ state 21
     MINUS           reduce using rule 6 (expression -> expression DIVIDE factor .)
     TIMES           reduce using rule 6 (expression -> expression DIVIDE factor .)
     DIVIDE          reduce using rule 6 (expression -> expression DIVIDE factor .)
+    MOD             reduce using rule 6 (expression -> expression DIVIDE factor .)
+    POWER           reduce using rule 6 (expression -> expression DIVIDE factor .)
+    EOP             reduce using rule 6 (expression -> expression DIVIDE factor .)
+    GREATER         reduce using rule 6 (expression -> expression DIVIDE factor .)
+    LESS            reduce using rule 6 (expression -> expression DIVIDE factor .)
+    GREATEROREQUAL  reduce using rule 6 (expression -> expression DIVIDE factor .)
+    LESSOREQUAL     reduce using rule 6 (expression -> expression DIVIDE factor .)
 
 
-state 22
+state 32
 
-    (9) boolean -> boolean AND boolean .
-    (9) boolean -> boolean . AND boolean
-    (10) boolean -> boolean . OR boolean
+    (7) expression -> expression MOD factor .
 
-  ! shift/reduce conflict for AND resolved as shift
-  ! shift/reduce conflict for OR resolved as shift
-    SEMICOLON       reduce using rule 9 (boolean -> boolean AND boolean .)
-    AND             shift and go to state 15
-    OR              shift and go to state 16
+    SEMICOLON       reduce using rule 7 (expression -> expression MOD factor .)
+    PLUS            reduce using rule 7 (expression -> expression MOD factor .)
+    MINUS           reduce using rule 7 (expression -> expression MOD factor .)
+    TIMES           reduce using rule 7 (expression -> expression MOD factor .)
+    DIVIDE          reduce using rule 7 (expression -> expression MOD factor .)
+    MOD             reduce using rule 7 (expression -> expression MOD factor .)
+    POWER           reduce using rule 7 (expression -> expression MOD factor .)
+    EOP             reduce using rule 7 (expression -> expression MOD factor .)
+    GREATER         reduce using rule 7 (expression -> expression MOD factor .)
+    LESS            reduce using rule 7 (expression -> expression MOD factor .)
+    GREATEROREQUAL  reduce using rule 7 (expression -> expression MOD factor .)
+    LESSOREQUAL     reduce using rule 7 (expression -> expression MOD factor .)
 
-  ! AND             [ reduce using rule 9 (boolean -> boolean AND boolean .) ]
-  ! OR              [ reduce using rule 9 (boolean -> boolean AND boolean .) ]
+
+state 33
+
+    (8) expression -> expression POWER factor .
+
+    SEMICOLON       reduce using rule 8 (expression -> expression POWER factor .)
+    PLUS            reduce using rule 8 (expression -> expression POWER factor .)
+    MINUS           reduce using rule 8 (expression -> expression POWER factor .)
+    TIMES           reduce using rule 8 (expression -> expression POWER factor .)
+    DIVIDE          reduce using rule 8 (expression -> expression POWER factor .)
+    MOD             reduce using rule 8 (expression -> expression POWER factor .)
+    POWER           reduce using rule 8 (expression -> expression POWER factor .)
+    EOP             reduce using rule 8 (expression -> expression POWER factor .)
+    GREATER         reduce using rule 8 (expression -> expression POWER factor .)
+    LESS            reduce using rule 8 (expression -> expression POWER factor .)
+    GREATEROREQUAL  reduce using rule 8 (expression -> expression POWER factor .)
+    LESSOREQUAL     reduce using rule 8 (expression -> expression POWER factor .)
 
 
-state 23
+state 34
 
-    (10) boolean -> boolean OR boolean .
-    (9) boolean -> boolean . AND boolean
-    (10) boolean -> boolean . OR boolean
+    (10) expression -> expression EOP expression .
+    (3) expression -> expression . PLUS factor
+    (4) expression -> expression . MINUS factor
+    (5) expression -> expression . TIMES factor
+    (6) expression -> expression . DIVIDE factor
+    (7) expression -> expression . MOD factor
+    (8) expression -> expression . POWER factor
+    (10) expression -> expression . EOP expression
 
-  ! shift/reduce conflict for AND resolved as shift
-  ! shift/reduce conflict for OR resolved as shift
-    SEMICOLON       reduce using rule 10 (boolean -> boolean OR boolean .)
-    AND             shift and go to state 15
-    OR              shift and go to state 16
+    SEMICOLON       reduce using rule 10 (expression -> expression EOP expression .)
+    PLUS            reduce using rule 10 (expression -> expression EOP expression .)
+    MINUS           reduce using rule 10 (expression -> expression EOP expression .)
+    TIMES           reduce using rule 10 (expression -> expression EOP expression .)
+    DIVIDE          reduce using rule 10 (expression -> expression EOP expression .)
+    MOD             reduce using rule 10 (expression -> expression EOP expression .)
+    POWER           reduce using rule 10 (expression -> expression EOP expression .)
+    EOP             reduce using rule 10 (expression -> expression EOP expression .)
+    GREATER         reduce using rule 10 (expression -> expression EOP expression .)
+    LESS            reduce using rule 10 (expression -> expression EOP expression .)
+    GREATEROREQUAL  reduce using rule 10 (expression -> expression EOP expression .)
+    LESSOREQUAL     reduce using rule 10 (expression -> expression EOP expression .)
 
-  ! AND             [ reduce using rule 10 (boolean -> boolean OR boolean .) ]
-  ! OR              [ reduce using rule 10 (boolean -> boolean OR boolean .) ]
+  ! PLUS            [ shift and go to state 11 ]
+  ! MINUS           [ shift and go to state 12 ]
+  ! TIMES           [ shift and go to state 13 ]
+  ! DIVIDE          [ shift and go to state 14 ]
+  ! MOD             [ shift and go to state 15 ]
+  ! POWER           [ shift and go to state 16 ]
+  ! EOP             [ shift and go to state 17 ]
 
-WARNING: 
-WARNING: Conflicts:
-WARNING: 
-WARNING: shift/reduce conflict for AND in state 17 resolved as shift
-WARNING: shift/reduce conflict for OR in state 17 resolved as shift
-WARNING: shift/reduce conflict for AND in state 22 resolved as shift
-WARNING: shift/reduce conflict for OR in state 22 resolved as shift
-WARNING: shift/reduce conflict for AND in state 23 resolved as shift
-WARNING: shift/reduce conflict for OR in state 23 resolved as shift
+
+state 35
+
+    (13) boolean -> expression GREATER factor .
+
+    SEMICOLON       reduce using rule 13 (boolean -> expression GREATER factor .)
+    AND             reduce using rule 13 (boolean -> expression GREATER factor .)
+    OR              reduce using rule 13 (boolean -> expression GREATER factor .)
+
+
+state 36
+
+    (14) boolean -> expression LESS factor .
+
+    SEMICOLON       reduce using rule 14 (boolean -> expression LESS factor .)
+    AND             reduce using rule 14 (boolean -> expression LESS factor .)
+    OR              reduce using rule 14 (boolean -> expression LESS factor .)
+
+
+state 37
+
+    (15) boolean -> expression GREATEROREQUAL factor .
+
+    SEMICOLON       reduce using rule 15 (boolean -> expression GREATEROREQUAL factor .)
+    AND             reduce using rule 15 (boolean -> expression GREATEROREQUAL factor .)
+    OR              reduce using rule 15 (boolean -> expression GREATEROREQUAL factor .)
+
+
+state 38
+
+    (16) boolean -> expression LESSOREQUAL factor .
+
+    SEMICOLON       reduce using rule 16 (boolean -> expression LESSOREQUAL factor .)
+    AND             reduce using rule 16 (boolean -> expression LESSOREQUAL factor .)
+    OR              reduce using rule 16 (boolean -> expression LESSOREQUAL factor .)
+
+
+state 39
+
+    (17) boolean -> boolean AND boolean .
+    (17) boolean -> boolean . AND boolean
+    (18) boolean -> boolean . OR boolean
+
+    SEMICOLON       reduce using rule 17 (boolean -> boolean AND boolean .)
+    AND             reduce using rule 17 (boolean -> boolean AND boolean .)
+    OR              reduce using rule 17 (boolean -> boolean AND boolean .)
+
+  ! AND             [ shift and go to state 23 ]
+  ! OR              [ shift and go to state 24 ]
+
+
+state 40
+
+    (18) boolean -> boolean OR boolean .
+    (17) boolean -> boolean . AND boolean
+    (18) boolean -> boolean . OR boolean
+
+    SEMICOLON       reduce using rule 18 (boolean -> boolean OR boolean .)
+    OR              reduce using rule 18 (boolean -> boolean OR boolean .)
+    AND             shift and go to state 23
+
+  ! AND             [ reduce using rule 18 (boolean -> boolean OR boolean .) ]
+  ! OR              [ shift and go to state 24 ]
+
