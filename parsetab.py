@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'leftPLUSMINUSORleftTIMESDIVIDEANDNOTleftEOPrightUMINUSAND CONS DIVIDE EOP EQUAL FALSE GREATER GREATEROREQUAL IN LBRACE LESS LESSOREQUAL LPAREN MINUS MOD NOT NOTEQUAL NUMBER OR PLUS POUND POWER PRINT RBRACE RPAREN SEMICOLON TIMES TRUEstatement : expression SEMICOLON\n         | boolean SEMICOLON\n    expression : expression PLUS factor\n                  | expression MINUS factor\n                  | expression TIMES factor\n                  | expression DIVIDE factor\n                  | expression MOD factor\n                  | expression POWER factor\n                   expression : MINUS expression %prec UMINUSexpression : expression EOP expressionexpression : factorfactor : NUMBER\n    boolean : expression GREATER factor\n            | expression LESS factor\n            | expression GREATEROREQUAL factor\n            | expression LESSOREQUAL factor\n    \n    boolean : boolean AND boolean\n        | boolean OR boolean\n    boolean : NOT boolean\n    boolean : TRUE\n        | FALSE\n    '
+_lr_signature = 'leftEQUALNOTEQUALleftPLUSMINUSORleftTIMESDIVIDEANDNOTleftEOPrightUMINUSAND CONS DIVIDE EOP EQUAL FALSE GREATER GREATEROREQUAL IN LBRACE LESS LESSOREQUAL LPAREN MINUS MOD NOT NOTEQUAL NUMBER OR PLUS POUND POWER PRINT RBRACE RPAREN SEMICOLON STRING TIMES TRUEstatement : expression SEMICOLON\n         | boolean SEMICOLON\n         | STRING SEMICOLON\n    \n    expression : LPAREN expression RPAREN\n    \n    expression : STRING PLUS STRING\n    expression : expression PLUS factor\n                  | expression MINUS factor\n                  | expression TIMES factor\n                  | expression DIVIDE factor\n                  | expression MOD factor\n                  | expression POWER factor\n                   expression : MINUS expression %prec UMINUSexpression : expression EOP expressionexpression : factorfactor : NUMBER\n    boolean : expression EQUAL expression\n        | expression NOTEQUAL expression\n        | boolean EQUAL boolean\n        | boolean NOTEQUAL boolean\n    \n    boolean : expression GREATER factor\n            | expression LESS factor\n            | expression GREATEROREQUAL factor\n            | expression LESSOREQUAL factor\n    \n    boolean : boolean AND boolean\n        | boolean OR boolean\n    boolean : NOT boolean\n    boolean : TRUE\n        | FALSE\n    '
     
-_lr_action_items = {'MINUS':([0,2,4,5,6,9,17,23,24,25,27,28,29,30,31,32,33,34,],[5,12,-11,5,5,-12,5,5,5,-9,12,-3,-4,-5,-6,-7,-8,-10,]),'NOT':([0,6,23,24,],[6,6,6,6,]),'TRUE':([0,6,23,24,],[7,7,7,7,]),'FALSE':([0,6,23,24,],[8,8,8,8,]),'NUMBER':([0,5,6,11,12,13,14,15,16,17,18,19,20,21,23,24,],[9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,]),'$end':([1,10,22,],[0,-1,-2,]),'SEMICOLON':([2,3,4,7,8,9,25,26,28,29,30,31,32,33,34,35,36,37,38,39,40,],[10,22,-11,-20,-21,-12,-9,-19,-3,-4,-5,-6,-7,-8,-10,-13,-14,-15,-16,-17,-18,]),'PLUS':([2,4,9,25,27,28,29,30,31,32,33,34,],[11,-11,-12,-9,11,-3,-4,-5,-6,-7,-8,-10,]),'TIMES':([2,4,9,25,27,28,29,30,31,32,33,34,],[13,-11,-12,-9,13,-3,-4,-5,-6,-7,-8,-10,]),'DIVIDE':([2,4,9,25,27,28,29,30,31,32,33,34,],[14,-11,-12,-9,14,-3,-4,-5,-6,-7,-8,-10,]),'MOD':([2,4,9,25,27,28,29,30,31,32,33,34,],[15,-11,-12,-9,15,-3,-4,-5,-6,-7,-8,-10,]),'POWER':([2,4,9,25,27,28,29,30,31,32,33,34,],[16,-11,-12,-9,16,-3,-4,-5,-6,-7,-8,-10,]),'EOP':([2,4,9,25,27,28,29,30,31,32,33,34,],[17,-11,-12,-9,17,-3,-4,-5,-6,-7,-8,-10,]),'GREATER':([2,4,9,25,27,28,29,30,31,32,33,34,],[18,-11,-12,-9,18,-3,-4,-5,-6,-7,-8,-10,]),'LESS':([2,4,9,25,27,28,29,30,31,32,33,34,],[19,-11,-12,-9,19,-3,-4,-5,-6,-7,-8,-10,]),'GREATEROREQUAL':([2,4,9,25,27,28,29,30,31,32,33,34,],[20,-11,-12,-9,20,-3,-4,-5,-6,-7,-8,-10,]),'LESSOREQUAL':([2,4,9,25,27,28,29,30,31,32,33,34,],[21,-11,-12,-9,21,-3,-4,-5,-6,-7,-8,-10,]),'AND':([3,7,8,9,26,35,36,37,38,39,40,],[23,-20,-21,-12,-19,-13,-14,-15,-16,-17,23,]),'OR':([3,7,8,9,26,35,36,37,38,39,40,],[24,-20,-21,-12,-19,-13,-14,-15,-16,-17,-18,]),}
+_lr_action_items = {'STRING':([0,5,7,8,19,20,21,27,28,29,30,32,],[4,34,34,34,34,34,34,34,34,34,34,55,]),'LPAREN':([0,5,7,8,19,20,21,27,28,29,30,],[5,5,5,5,5,5,5,5,5,5,5,]),'MINUS':([0,2,5,6,7,8,11,19,20,21,27,28,29,30,33,35,37,38,39,40,41,42,43,44,45,46,55,56,],[7,14,7,-14,7,7,-15,7,7,7,7,7,7,7,14,-12,14,-6,-7,-8,-9,-10,-11,-13,14,14,-5,-4,]),'NOT':([0,8,27,28,29,30,],[8,8,8,8,8,8,]),'TRUE':([0,8,27,28,29,30,],[9,9,9,9,9,9,]),'FALSE':([0,8,27,28,29,30,],[10,10,10,10,10,10,]),'NUMBER':([0,5,7,8,13,14,15,16,17,18,19,20,21,22,23,24,25,27,28,29,30,],[11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,]),'$end':([1,12,26,31,],[0,-1,-2,-3,]),'SEMICOLON':([2,3,4,6,9,10,11,35,36,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,],[12,26,31,-14,-27,-28,-15,-12,-26,-6,-7,-8,-9,-10,-11,-13,-16,-17,-20,-21,-22,-23,-18,-19,-24,-25,-5,-4,]),'PLUS':([2,4,6,11,33,34,35,37,38,39,40,41,42,43,44,45,46,55,56,],[13,32,-14,-15,13,32,-12,13,-6,-7,-8,-9,-10,-11,-13,13,13,-5,-4,]),'TIMES':([2,6,11,33,35,37,38,39,40,41,42,43,44,45,46,55,56,],[15,-14,-15,15,-12,15,-6,-7,-8,-9,-10,-11,-13,15,15,-5,-4,]),'DIVIDE':([2,6,11,33,35,37,38,39,40,41,42,43,44,45,46,55,56,],[16,-14,-15,16,-12,16,-6,-7,-8,-9,-10,-11,-13,16,16,-5,-4,]),'MOD':([2,6,11,33,35,37,38,39,40,41,42,43,44,45,46,55,56,],[17,-14,-15,17,-12,17,-6,-7,-8,-9,-10,-11,-13,17,17,-5,-4,]),'POWER':([2,6,11,33,35,37,38,39,40,41,42,43,44,45,46,55,56,],[18,-14,-15,18,-12,18,-6,-7,-8,-9,-10,-11,-13,18,18,-5,-4,]),'EOP':([2,6,11,33,35,37,38,39,40,41,42,43,44,45,46,55,56,],[19,-14,-15,19,-12,19,-6,-7,-8,-9,-10,-11,-13,19,19,-5,-4,]),'EQUAL':([2,3,6,9,10,11,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,],[20,27,-14,-27,-28,-15,-12,-26,20,-6,-7,-8,-9,-10,-11,-13,-16,-17,-20,-21,-22,-23,-18,-19,-24,-25,-5,-4,]),'NOTEQUAL':([2,3,6,9,10,11,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,],[21,28,-14,-27,-28,-15,-12,-26,21,-6,-7,-8,-9,-10,-11,-13,-16,-17,-20,-21,-22,-23,-18,-19,-24,-25,-5,-4,]),'GREATER':([2,6,11,35,37,38,39,40,41,42,43,44,55,56,],[22,-14,-15,-12,22,-6,-7,-8,-9,-10,-11,-13,-5,-4,]),'LESS':([2,6,11,35,37,38,39,40,41,42,43,44,55,56,],[23,-14,-15,-12,23,-6,-7,-8,-9,-10,-11,-13,-5,-4,]),'GREATEROREQUAL':([2,6,11,35,37,38,39,40,41,42,43,44,55,56,],[24,-14,-15,-12,24,-6,-7,-8,-9,-10,-11,-13,-5,-4,]),'LESSOREQUAL':([2,6,11,35,37,38,39,40,41,42,43,44,55,56,],[25,-14,-15,-12,25,-6,-7,-8,-9,-10,-11,-13,-5,-4,]),'AND':([3,6,9,10,11,35,36,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,],[29,-14,-27,-28,-15,-12,-26,-6,-7,-8,-9,-10,-11,-13,-16,-17,-20,-21,-22,-23,29,29,-24,29,-5,-4,]),'OR':([3,6,9,10,11,35,36,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,],[30,-14,-27,-28,-15,-12,-26,-6,-7,-8,-9,-10,-11,-13,-16,-17,-20,-21,-22,-23,30,30,-24,-25,-5,-4,]),'RPAREN':([6,11,33,35,38,39,40,41,42,43,44,55,56,],[-14,-15,56,-12,-6,-7,-8,-9,-10,-11,-13,-5,-4,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'statement':([0,],[1,]),'expression':([0,5,6,17,23,24,],[2,25,27,34,27,27,]),'boolean':([0,6,23,24,],[3,26,39,40,]),'factor':([0,5,6,11,12,13,14,15,16,17,18,19,20,21,23,24,],[4,4,4,28,29,30,31,32,33,4,35,36,37,38,4,4,]),}
+_lr_goto_items = {'statement':([0,],[1,]),'expression':([0,5,7,8,19,20,21,27,28,29,30,],[2,33,35,37,44,45,46,37,37,37,37,]),'boolean':([0,8,27,28,29,30,],[3,36,51,52,53,54,]),'factor':([0,5,7,8,13,14,15,16,17,18,19,20,21,22,23,24,25,27,28,29,30,],[6,6,6,6,38,39,40,41,42,43,6,6,6,47,48,49,50,6,6,6,6,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,25 +27,32 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> statement","S'",1,None,None,None),
-  ('statement -> expression SEMICOLON','statement',2,'p_statement_exp','sbml.py',215),
-  ('statement -> boolean SEMICOLON','statement',2,'p_statement_exp','sbml.py',216),
-  ('expression -> expression PLUS factor','expression',3,'p_expression_op','sbml.py',222),
-  ('expression -> expression MINUS factor','expression',3,'p_expression_op','sbml.py',223),
-  ('expression -> expression TIMES factor','expression',3,'p_expression_op','sbml.py',224),
-  ('expression -> expression DIVIDE factor','expression',3,'p_expression_op','sbml.py',225),
-  ('expression -> expression MOD factor','expression',3,'p_expression_op','sbml.py',226),
-  ('expression -> expression POWER factor','expression',3,'p_expression_op','sbml.py',227),
-  ('expression -> MINUS expression','expression',2,'p_expr_uminus','sbml.py',233),
-  ('expression -> expression EOP expression','expression',3,'p_EOP','sbml.py',237),
-  ('expression -> factor','expression',1,'p_expression_factor','sbml.py',241),
-  ('factor -> NUMBER','factor',1,'p_factor_number','sbml.py',246),
-  ('boolean -> expression GREATER factor','boolean',3,'p_comparison_numbers','sbml.py',251),
-  ('boolean -> expression LESS factor','boolean',3,'p_comparison_numbers','sbml.py',252),
-  ('boolean -> expression GREATEROREQUAL factor','boolean',3,'p_comparison_numbers','sbml.py',253),
-  ('boolean -> expression LESSOREQUAL factor','boolean',3,'p_comparison_numbers','sbml.py',254),
-  ('boolean -> boolean AND boolean','boolean',3,'p_boolean_op','sbml.py',260),
-  ('boolean -> boolean OR boolean','boolean',3,'p_boolean_op','sbml.py',261),
-  ('boolean -> NOT boolean','boolean',2,'p_boolean_not','sbml.py',266),
-  ('boolean -> TRUE','boolean',1,'p_boolean','sbml.py',271),
-  ('boolean -> FALSE','boolean',1,'p_boolean','sbml.py',272),
+  ('statement -> expression SEMICOLON','statement',2,'p_statement_exp','sbml.py',227),
+  ('statement -> boolean SEMICOLON','statement',2,'p_statement_exp','sbml.py',228),
+  ('statement -> STRING SEMICOLON','statement',2,'p_statement_exp','sbml.py',229),
+  ('expression -> LPAREN expression RPAREN','expression',3,'p_parenthesis','sbml.py',235),
+  ('expression -> STRING PLUS STRING','expression',3,'p_concat','sbml.py',241),
+  ('expression -> expression PLUS factor','expression',3,'p_expression_op','sbml.py',246),
+  ('expression -> expression MINUS factor','expression',3,'p_expression_op','sbml.py',247),
+  ('expression -> expression TIMES factor','expression',3,'p_expression_op','sbml.py',248),
+  ('expression -> expression DIVIDE factor','expression',3,'p_expression_op','sbml.py',249),
+  ('expression -> expression MOD factor','expression',3,'p_expression_op','sbml.py',250),
+  ('expression -> expression POWER factor','expression',3,'p_expression_op','sbml.py',251),
+  ('expression -> MINUS expression','expression',2,'p_expr_uminus','sbml.py',257),
+  ('expression -> expression EOP expression','expression',3,'p_EOP','sbml.py',261),
+  ('expression -> factor','expression',1,'p_expression_factor','sbml.py',265),
+  ('factor -> NUMBER','factor',1,'p_factor_number','sbml.py',270),
+  ('boolean -> expression EQUAL expression','boolean',3,'p_equal','sbml.py',275),
+  ('boolean -> expression NOTEQUAL expression','boolean',3,'p_equal','sbml.py',276),
+  ('boolean -> boolean EQUAL boolean','boolean',3,'p_equal','sbml.py',277),
+  ('boolean -> boolean NOTEQUAL boolean','boolean',3,'p_equal','sbml.py',278),
+  ('boolean -> expression GREATER factor','boolean',3,'p_comparison_numbers','sbml.py',284),
+  ('boolean -> expression LESS factor','boolean',3,'p_comparison_numbers','sbml.py',285),
+  ('boolean -> expression GREATEROREQUAL factor','boolean',3,'p_comparison_numbers','sbml.py',286),
+  ('boolean -> expression LESSOREQUAL factor','boolean',3,'p_comparison_numbers','sbml.py',287),
+  ('boolean -> boolean AND boolean','boolean',3,'p_boolean_op','sbml.py',293),
+  ('boolean -> boolean OR boolean','boolean',3,'p_boolean_op','sbml.py',294),
+  ('boolean -> NOT boolean','boolean',2,'p_boolean_not','sbml.py',299),
+  ('boolean -> TRUE','boolean',1,'p_boolean','sbml.py',304),
+  ('boolean -> FALSE','boolean',1,'p_boolean','sbml.py',305),
 ]

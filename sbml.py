@@ -65,7 +65,16 @@ class OpNode(Node):
         elif (self.op == '**'):
             return self.v1.evaluate() ** self.v2.evaluate()
 
-
+class IsEqualNode(Node):
+    def __init__(self, op, v1, v2):
+        self.v1 = v1
+        self.v2 = v2
+        self.op = op
+    def evaluate(self):
+        if(self.op == '=='):
+            return self.v1.evaluate() == self.v2.evaluate()
+        elif(self.op == ',>'):
+            return self.v1.evaluate() != self.v2.evaluate()
 
 class NumberComparisonNode(Node):
     def __init__(self, op, v1, v2):
@@ -116,6 +125,26 @@ class BooleanOpNode(Node):
         elif (self.op == 'orelse'):
             return self.v1.evaluate() or self.v2.evaluate()
 
+
+class StringNode(Node):
+    def __init__(self, v):
+        if v[0] == '\'' or v[0] == '\"':
+            self.value = v[1:len(v)-1]
+        else:
+            self.value = v
+
+    def evaluate(self):
+        return self.value
+
+
+class StringConcatNode(Node):
+    def __init__(self, s1, s2):
+        self.s1 = s1
+        self.s2 = s2
+
+    def evaluate(self):
+        return self.s1.evaluate() + self.s2.evaluate()
+
 import ply.lex as lex
 import ply.yacc as yacc
 import sys
@@ -139,7 +168,7 @@ reserved = {
 
 tokens = [
     'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'SEMICOLON',
-    'NUMBER', 'EOP',
+    'NUMBER', 'EOP', 'STRING',
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'POWER', 'CONS', 'POUND',
     'GREATER', 'LESS', 'EQUAL', 'GREATEROREQUAL', 'LESSOREQUAL', 'NOTEQUAL'
 ] + list(reserved.values())
@@ -170,6 +199,11 @@ t_GREATEROREQUAL = r'>='
 t_LESSOREQUAL = r'<='
 t_NOTEQUAL = r'<>'
 t_EOP = r'e'
+
+def t_STRING(t):
+    r'\"(\\\\|\\"|[^\"])*\"|\'(\\\\|\\\'|[^\'])*\''
+    t.value = StringNode(t.value)
+    return t
 
 def t_TRUE(t):
     'True'
@@ -205,8 +239,10 @@ lex.lex()
 
 precedence = (
     # ('left', 'SEMICOLON'),
+    ('left', 'EQUAL', 'NOTEQUAL'),
     ('left', 'PLUS', 'MINUS', 'OR'),
     ('left', 'TIMES', 'DIVIDE', 'AND', 'NOT'),
+    # ('left', 'LPAREN', 'RPAREN'),
     ('left', 'EOP'),
     ('right', 'UMINUS')
 )
@@ -214,9 +250,21 @@ precedence = (
 def p_statement_exp(t):
     '''statement : expression SEMICOLON
          | boolean SEMICOLON
+         | STRING SEMICOLON
     '''
     t[0] = ExecuteStatmentNode(t[1])
 
+def p_parenthesis(t):
+    '''
+    expression : LPAREN expression RPAREN
+    '''
+    t[0] = t[2]
+
+def p_concat(t):
+    '''
+    expression : STRING PLUS STRING
+    '''
+    t[0] = StringConcatNode(t[1], t[3])
 
 def p_expression_op(t):
     '''expression : expression PLUS factor
@@ -245,6 +293,15 @@ def p_expression_factor(t):
 def p_factor_number(t):
     'factor : NUMBER'
     t[0] = t[1]
+
+def p_equal(t):
+    '''
+    boolean : expression EQUAL expression
+        | expression NOTEQUAL expression
+        | boolean EQUAL boolean
+        | boolean NOTEQUAL boolean
+    '''
+    t[0] = IsEqualNode(t[2], t[1], t[3])
 
 def p_comparison_numbers(t):
     '''
