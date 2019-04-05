@@ -78,7 +78,7 @@ class IsEqualNode(Node):
         elif(self.op == ',>'):
             return self.v1.evaluate() != self.v2.evaluate()
 
-class NumberComparisonNode(Node):
+class ComparisonNode(Node):
     def __init__(self, op, v1, v2):
         self.v1 = v1
         self.v2 = v2
@@ -93,6 +93,8 @@ class NumberComparisonNode(Node):
             return self.v1.evaluate() >= self.v2.evaluate()
         elif (self.op == '<='):
             return self.v1.evaluate() <= self.v2.evaluate()
+        elif (self.op == '=='):
+            return self.v1.evaluate() == self.v2.evaluate()
 
 
 class BooleanNode(Node):
@@ -131,12 +133,18 @@ class BooleanOpNode(Node):
 class StringNode(Node):
     def __init__(self, v):
         if v[0] == '\'' or v[0] == '\"':
-            self.value = v[1:len(v)-1]
+            self.v = v[1:len(v)-1]
         else:
-            self.value = v
+            self.v = v
+
+    def output(self):
+        return '\'' + self.value + '\''
+
+    def get(self, index):
+        return StringNode(self.v[index.evaluate()])
 
     def evaluate(self):
-        return self.value
+        return self.v
 
 
 class StringConcatNode(Node):
@@ -149,15 +157,35 @@ class StringConcatNode(Node):
 
 class ListNode(Node):
     def __init__(self, v):
-        self.v = [v.evaluate()]
+        if v is not None:
+            self.v = [v]
+        else:
+            self.v = []
 
     def append(self, elm):
-        self.v.append(elm.evaluate())
+        self.v.append(elm)
+
+    def prepend(self, elm):
+        self.v.insert(0, elm)
+
+    def get(self, index):
+        return self.v[index.evaluate()]
 
     def evaluate(self):
-        return  self.v
+        l = []
+        for node in self.v:
+            l.append(node.evaluate())
+        return l
 
 
+class InList(Node):
+
+    def __init__(self, item, list):
+        self.item = item
+        self.list = list
+
+    def evaluate(self):
+        return self.item.evaluate() in self.list.evaluate()
 
 import ply.lex as lex
 import ply.yacc as yacc
@@ -217,7 +245,7 @@ t_NOTEQUAL = r'<>'
 t_EOP = r'e'
 
 def t_STRING(t):
-    r'\"(\\\\|\\"|[^\"])*\"|\'(\\\\|\\\'|[^\'])*\''
+    r'\"([^\"\'])*\"|\'([^\'\"])*\''
     t.value = StringNode(t.value)
     return t
 
@@ -266,8 +294,14 @@ precedence = (
 def p_statement_exp(t):
     '''statement : expression SEMICOLON
          | boolean SEMICOLON
-         | STRING SEMICOLON
+         | list SEMICOLON
     '''
+    t[0] = ExecuteStatmentNode(t[1])
+
+def p_string_exp(t):
+    '''statement : STRING SEMICOLON
+    '''
+
     t[0] = ExecuteStatmentNode(t[1])
 
 def p_parenthesis(t):
@@ -320,14 +354,21 @@ def p_equal(t):
     '''
     t[0] = IsEqualNode(t[2], t[1], t[3])
 
-def p_comparison_numbers(t):
+def p_comparison(t):
     '''
     boolean : expression GREATER factor
             | expression LESS factor
             | expression GREATEROREQUAL factor
             | expression LESSOREQUAL factor
+            | expression EQUAL factor
+            | STRING GREATER STRING
+            | STRING LESS STRING
+            | STRING GREATEROREQUAL STRING
+            | STRING LESSOREQUAL STRING
+            | STRING EQUAL STRING
+
     '''
-    t[0] = NumberComparisonNode(t[2], t[1], t[3])
+    t[0] = ComparisonNode(t[2], t[1], t[3])
 
 def p_boolean_op(t):
     '''
@@ -350,12 +391,16 @@ def p_boolean(t):
 def p_list_elms(t):
     '''
     list_element : expression
+        | STRING
+        | boolean
     '''
     t[0] = ListNode(t[1])
 
 def p_list_elms_cont(t):
     '''
     list_element : list_element expression
+    | list_element STRING
+    | list_element boolean
     '''
     t[1].append(t[2])
     t[0] = t[1]
@@ -366,11 +411,39 @@ def p_list_elms_end(t):
 
 def p_list(t):
     '''
-    expression : LBRACE list_element RBRACE
+    list : LBRACE list_element RBRACE
+        | LBRACE RBRACE
     '''
-    t[0] = t[2]
+    if(len(t) >= 4):
+        t[0] = t[2]
+    else:
+        t[0] = ListNode(None)
 
+def p_index(t):
+    '''
+    expression : list LBRACE expression RBRACE
+        | STRING LBRACE expression RBRACE
+    '''
+    t[0] = t[1].get(t[3])
 
+def p_cons(t):
+    '''
+    list : expression CONS list
+        | boolean CONS list
+        | STRING CONS list
+        | list CONS list
+    '''
+    t[3].prepend(t[1])
+    t[0] = t[3]
+
+def p_in_list(t):
+    '''
+    boolean : expression IN list
+        | boolean IN list
+        | STRING IN list
+        | list IN list
+    '''
+    t[0] = InList(t[1], t[3])
 
 def p_error(t):
     print("Syntax error at '%s'" % t.value)
@@ -392,7 +465,9 @@ for line in lines:
             if not token: break
             print(token)
         print(code)
-        ast = yacc.parse(code, debug=1)
+        # ast = yacc.parse(code, debug=1)
+        ast = yacc.parse(code)
+
         ast.execute()
     except Exception:
         error = traceback.format_exc()
