@@ -60,6 +60,8 @@ class OpNode(Node):
             return self.v1.evaluate() * self.v2.evaluate()
         elif (self.op == '/'):
             return self.v1.evaluate() / self.v2.evaluate()
+        elif (self.op == 'div'):
+            return self.v1.evaluate() // self.v2.evaluate()
         elif (self.op == 'mod'):
             return self.v1.evaluate() % self.v2.evaluate()
         elif (self.op == '**'):
@@ -145,6 +147,18 @@ class StringConcatNode(Node):
     def evaluate(self):
         return self.s1.evaluate() + self.s2.evaluate()
 
+class ListNode(Node):
+    def __init__(self, v):
+        self.v = [v.evaluate()]
+
+    def append(self, elm):
+        self.v.append(elm.evaluate())
+
+    def evaluate(self):
+        return  self.v
+
+
+
 import ply.lex as lex
 import ply.yacc as yacc
 import sys
@@ -167,9 +181,9 @@ reserved = {
  }
 
 tokens = [
-    'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'SEMICOLON',
+    'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'COMMA', 'SEMICOLON',
     'NUMBER', 'EOP', 'STRING',
-    'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'POWER', 'CONS', 'POUND',
+    'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'DIV', 'POWER', 'CONS', 'POUND',
     'GREATER', 'LESS', 'EQUAL', 'GREATEROREQUAL', 'LESSOREQUAL', 'NOTEQUAL'
 ] + list(reserved.values())
 
@@ -184,11 +198,13 @@ t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_LBRACE = r'\['
 t_RBRACE = r'\]'
+t_COMMA = r','
 t_SEMICOLON = r'\;'
 t_PLUS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
 t_DIVIDE = r'/'
+t_DIV = 'div'
 t_POWER = r'\*\*'
 t_CONS = r'::'
 t_POUND = r'\#'
@@ -238,10 +254,10 @@ lex.lex()
 # -------------------------------------------
 
 precedence = (
-    # ('left', 'SEMICOLON'),
+    ('left', 'LBRACE', 'RBRACE'),
     ('left', 'EQUAL', 'NOTEQUAL'),
     ('left', 'PLUS', 'MINUS', 'OR'),
-    ('left', 'TIMES', 'DIVIDE', 'AND', 'NOT'),
+    ('left', 'TIMES', 'DIVIDE', 'DIV', 'AND', 'NOT'),
     # ('left', 'LPAREN', 'RPAREN'),
     ('left', 'EOP'),
     ('right', 'UMINUS')
@@ -271,6 +287,7 @@ def p_expression_op(t):
                   | expression MINUS factor
                   | expression TIMES factor
                   | expression DIVIDE factor
+                  | expression DIV factor
                   | expression MOD factor
                   | expression POWER factor
                    '''
@@ -330,6 +347,31 @@ def p_boolean(t):
     '''
     t[0] = t[1]
 
+def p_list_elms(t):
+    '''
+    list_element : expression
+    '''
+    t[0] = ListNode(t[1])
+
+def p_list_elms_cont(t):
+    '''
+    list_element : list_element expression
+    '''
+    t[1].append(t[2])
+    t[0] = t[1]
+
+def p_list_elms_end(t):
+    'list_element : list_element COMMA'
+    t[0] = t[1]
+
+def p_list(t):
+    '''
+    expression : LBRACE list_element RBRACE
+    '''
+    t[0] = t[2]
+
+
+
 def p_error(t):
     print("Syntax error at '%s'" % t.value)
 
@@ -350,7 +392,7 @@ for line in lines:
             if not token: break
             print(token)
         print(code)
-        ast = yacc.parse(code)
+        ast = yacc.parse(code, debug=1)
         ast.execute()
     except Exception:
         error = traceback.format_exc()
