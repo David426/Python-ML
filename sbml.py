@@ -52,7 +52,7 @@ class OpNode(Node):
         self.op = op
 
     def evaluate(self):
-        if (self.op == '+'):
+        if self.op == '+':
             return self.v1.evaluate() + self.v2.evaluate()
         elif (self.op == '-'):
             return self.v1.evaluate() - self.v2.evaluate()
@@ -147,7 +147,7 @@ class StringNode(Node):
         return self.v
 
 
-class StringConcatNode(Node):
+class ConcatNode(Node):
     def __init__(self, s1, s2):
         self.s1 = s1
         self.s2 = s2
@@ -283,10 +283,13 @@ lex.lex()
 
 precedence = (
     ('left', 'LBRACE', 'RBRACE'),
-    ('left', 'EQUAL', 'NOTEQUAL'),
-    ('left', 'PLUS', 'MINUS', 'OR'),
-    ('left', 'TIMES', 'DIVIDE', 'DIV', 'AND', 'NOT'),
-    # ('left', 'LPAREN', 'RPAREN'),
+    ('left', 'OR'),
+    ('left', 'AND'),
+    ('left', 'NOT'),
+    ('left', 'EQUAL', 'NOTEQUAL', 'GREATER', 'GREATEROREQUAL', 'LESS', 'LESSOREQUAL'),
+    ('left', 'PLUS', 'MINUS'),
+    ('left', 'TIMES', 'DIVIDE', 'DIV'),
+    ('right', 'POWER'),
     ('left', 'EOP'),
     ('right', 'UMINUS')
 )
@@ -306,15 +309,16 @@ def p_string_exp(t):
 
 def p_parenthesis(t):
     '''
-    expression : LPAREN expression RPAREN
+    factor : LPAREN expression RPAREN
     '''
     t[0] = t[2]
 
 def p_concat(t):
     '''
     expression : STRING PLUS STRING
+        | list PLUS list
     '''
-    t[0] = StringConcatNode(t[1], t[3])
+    t[0] = ConcatNode(t[1], t[3])
 
 def p_expression_op(t):
     '''expression : expression PLUS factor
@@ -323,13 +327,13 @@ def p_expression_op(t):
                   | expression DIVIDE factor
                   | expression DIV factor
                   | expression MOD factor
-                  | expression POWER factor
+                  | factor POWER expression
                    '''
     t[0] = OpNode(t[2], t[1], t[3])
 
 
 def p_expr_uminus(t):
-    'expression : MINUS expression %prec UMINUS'
+    'factor : MINUS expression %prec UMINUS'
     t[0] = NegateNode(t[2])
 
 def p_EOP(t):
@@ -405,7 +409,7 @@ def p_list_elms_cont(t):
     t[1].append(t[2])
     t[0] = t[1]
 
-def p_list_elms_end(t):
+def p_list_elms_comma(t):
     'list_element : list_element COMMA'
     t[0] = t[1]
 
@@ -446,14 +450,17 @@ def p_in_list(t):
     t[0] = InList(t[1], t[3])
 
 def p_error(t):
-    print("Syntax error at '%s'" % t.value)
+    print("SYNTAX ERROR")
 
 yacc.yacc()
 
 
-file = open('testInput.txt', 'r')
+# file = open('testInput.txt', 'r')
+
+file = open(sys.argv[1], 'r')
+
 lines = file.readlines()
-print(lines)
+# print(lines)
 code = ""
 for line in lines:
     # if len(line) < 2: continue
@@ -463,8 +470,8 @@ for line in lines:
         while True:
             token = lex.token()
             if not token: break
-            print(token)
-        print(code)
+            # print(token)
+        # print(code)
         # ast = yacc.parse(code, debug=1)
         ast = yacc.parse(code)
 
