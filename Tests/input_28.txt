@@ -1,1 +1,1 @@
-(("abc"[1] == "cde"[2] or true) and (false or true)) and (true or false);
+(("abc"[1] == "cde"[2] orelse true) andalso (false orelse true)) andalso (true orelse false);

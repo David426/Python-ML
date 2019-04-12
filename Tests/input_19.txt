@@ -1,1 +1,1 @@
-"a" < "b" and 'a' in "abc" and "a" + "b" + 'c' in 'a' + "b" + 'c' and not 'd' in ("abc" + ("def"[1])) and "a" + "b" < 'b' and 'abc' <> "def" and "test" == 'test' and "test1" >= 'test' and 'test'[0] <= 't';
+"a" < "b" andalso 'a' in "abc" andalso "a" + "b" + 'c' in 'a' + "b" + 'c' andalso not 'd' in ("abc" + ("def"[1])) andalso "a" + "b" < 'b' andalso 'abc' <> "def" andalso "test" == 'test' andalso "test1" >= 'test' andalso 'test'[0] <= 't';

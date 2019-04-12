@@ -1,1 +1,1 @@
-not true or not false;
+not true orelse not false;

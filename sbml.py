@@ -42,7 +42,10 @@ class ExecuteStatmentNode(Node):
 
     def execute(self):
         self.value = self.value.evaluate()
-        print(self.value)
+        if isinstance(self.value, str):
+            print('\'' + self.value + '\'')
+        else:
+            print(self.value)
 
 
 class OpNode(Node):
@@ -99,7 +102,7 @@ class ComparisonNode(Node):
 
 class BooleanNode(Node):
     def __init__(self, v):
-        if 'True' == v:
+        if 'true' == v:
             self.value = True
         else:
             self.value = False
@@ -185,6 +188,7 @@ class InList(Node):
         self.list = list
 
     def evaluate(self):
+        # print("Item: " + self.item.__str__ + " List: " + self.list.__str__)
         return self.item.evaluate() in self.list.evaluate()
 
 import ply.lex as lex
@@ -198,14 +202,13 @@ import string
 # ------------------------------------
 
 reserved = {
-    'print' : 'PRINT',
     'mod' : 'MOD',
     'andalso' : 'AND',
     'orelse' : 'OR',
     'in' : 'IN',
     'not' : 'NOT',
-    'True': 'TRUE',
-    'False' : 'FALSE'
+    'true': 'TRUE',
+    'false' : 'FALSE'
  }
 
 tokens = [
@@ -216,7 +219,6 @@ tokens = [
 ] + list(reserved.values())
 
 #Tokens
-t_PRINT = 'print'
 t_MOD = 'mod'
 t_AND = 'andalso'
 t_OR = 'orelse'
@@ -255,7 +257,7 @@ def t_TRUE(t):
     return t
 
 def t_FALSE(t):
-    'False'
+    'false'
     t.value = BooleanNode(t.value)
     return t
 
@@ -302,7 +304,7 @@ def p_statement_exp(t):
     t[0] = ExecuteStatmentNode(t[1])
 
 def p_string_exp(t):
-    '''statement : STRING SEMICOLON
+    '''statement : string_exp SEMICOLON
     '''
 
     t[0] = ExecuteStatmentNode(t[1])
@@ -315,19 +317,24 @@ def p_parenthesis(t):
 
 def p_concat(t):
     '''
-    expression : STRING PLUS STRING
-        | list PLUS list
+    string_exp : string_exp PLUS string_exp
+    list :  list PLUS list
     '''
     t[0] = ConcatNode(t[1], t[3])
 
+def p_string_expression(t):
+    'string_exp : STRING'
+    t[0] = t[1]
+    t[0] = t[1]
+
 def p_expression_op(t):
-    '''expression : expression PLUS factor
-                  | expression MINUS factor
-                  | expression TIMES factor
-                  | expression DIVIDE factor
-                  | expression DIV factor
-                  | expression MOD factor
-                  | factor POWER expression
+    '''expression : expression PLUS expression
+                  | expression MINUS expression
+                  | expression TIMES expression
+                  | expression DIVIDE expression
+                  | expression DIV expression
+                  | expression MOD expression
+                  | expression POWER expression
                    '''
     t[0] = OpNode(t[2], t[1], t[3])
 
@@ -365,11 +372,11 @@ def p_comparison(t):
             | expression GREATEROREQUAL factor
             | expression LESSOREQUAL factor
             | expression EQUAL factor
-            | STRING GREATER STRING
-            | STRING LESS STRING
-            | STRING GREATEROREQUAL STRING
-            | STRING LESSOREQUAL STRING
-            | STRING EQUAL STRING
+            | string_exp GREATER string_exp
+            | string_exp LESS string_exp
+            | string_exp GREATEROREQUAL string_exp
+            | string_exp LESSOREQUAL string_exp
+            | string_exp EQUAL string_exp
 
     '''
     t[0] = ComparisonNode(t[2], t[1], t[3])
@@ -395,16 +402,18 @@ def p_boolean(t):
 def p_list_elms(t):
     '''
     list_element : expression
-        | STRING
+        | string_exp
         | boolean
+        | list
     '''
     t[0] = ListNode(t[1])
 
 def p_list_elms_cont(t):
     '''
     list_element : list_element expression
-    | list_element STRING
+    | list_element string_exp
     | list_element boolean
+    | list_element list
     '''
     t[1].append(t[2])
     t[0] = t[1]
@@ -426,15 +435,18 @@ def p_list(t):
 def p_index(t):
     '''
     expression : list LBRACE expression RBRACE
-        | STRING LBRACE expression RBRACE
+        | string_exp LBRACE expression RBRACE
+        | expression LBRACE expression RBRACE
     '''
-    t[0] = t[1].get(t[3])
-
+    if isinstance(t[1], ListNode) or isinstance(t[1], StringNode):
+        t[0] = t[1].get(t[3])
+    else:
+        p_error(t)
 def p_cons(t):
     '''
     list : expression CONS list
         | boolean CONS list
-        | STRING CONS list
+        | string_exp CONS list
         | list CONS list
     '''
     t[3].prepend(t[1])
@@ -444,24 +456,31 @@ def p_in_list(t):
     '''
     boolean : expression IN list
         | boolean IN list
+        | string_exp IN list
         | STRING IN list
         | list IN list
+        | string_exp IN STRING
+        | STRING IN STRING
     '''
     t[0] = InList(t[1], t[3])
 
 def p_error(t):
     print("SYNTAX ERROR")
+    return
+
+def p_semantic_error(t):
+    print("SEMANTIC ERROR")
 
 yacc.yacc()
 
 
-# file = open('testInput.txt', 'r')
-
 file = open(sys.argv[1], 'r')
+# file = open('Tests/input_18.txt', 'r')
 
 lines = file.readlines()
 # print(lines)
 code = ""
+debug_toke_list = []
 for line in lines:
     # if len(line) < 2: continue
     code = line.strip()
@@ -469,11 +488,12 @@ for line in lines:
         lex.input(code)
         while True:
             token = lex.token()
+            debug_toke_list.append(token)
             if not token: break
             # print(token)
         # print(code)
-        # ast = yacc.parse(code, debug=1)
-        ast = yacc.parse(code)
+        ast = yacc.parse(code, debug=0)
+        # ast = yacc.parse(code)
 
         ast.execute()
     except Exception:
@@ -482,4 +502,6 @@ for line in lines:
     else:
         error = ""
     finally:
-        print(error)
+        # print(debug_toke_list)
+        # print(error)
+        exit(0)
