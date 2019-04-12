@@ -296,7 +296,7 @@ precedence = (
     ('right', 'POWER'),
     ('left', 'LIST_INDEX'),
     ('left', 'EOP'),
-    ('left', 'PARENTHESIS'),
+    # ('right', 'PARENTHESIS'),
     ('right', 'UMINUS')
 )
 
@@ -313,14 +313,10 @@ def p_string_exp(t):
 
     t[0] = ExecuteStatmentNode(t[1])
 
-# def p_string_exp_string(t):
-#     '''
-#     string_exp : STRING
-#     '''
-#     t[0] = t[1]
 def p_parenthesis(t):
     '''
-    factor : LPAREN expression RPAREN %prec PARENTHESIS
+    expression : LPAREN expression RPAREN
+    string_exp : LPAREN string_exp RPAREN
     '''
     t[0] = t[2]
 
@@ -366,30 +362,31 @@ def p_factor_number(t):
 
 def p_equal(t):
     '''
-    boolean : expression EQUAL expression
-        | expression NOTEQUAL expression
-        | boolean EQUAL boolean
+    boolean : boolean EQUAL boolean
         | boolean NOTEQUAL boolean
     '''
     t[0] = IsEqualNode(t[2], t[1], t[3])
 
 def p_comparison(t):
     '''
-    boolean : expression GREATER factor
-            | expression LESS factor
-            | expression GREATEROREQUAL factor
-            | expression LESSOREQUAL factor
-            | expression EQUAL factor
-            | expression NOTEQUAL factor
+    boolean : expression GREATER expression
+            | expression LESS expression
+            | expression GREATEROREQUAL expression
+            | expression LESSOREQUAL expression
+            | expression EQUAL expression
+            | expression NOTEQUAL expression
             | string_exp GREATER string_exp
             | string_exp LESS string_exp
             | string_exp GREATEROREQUAL string_exp
             | string_exp LESSOREQUAL string_exp
             | string_exp EQUAL string_exp
             | string_exp NOTEQUAL string_exp
-
     '''
     t[0] = ComparisonNode(t[2], t[1], t[3])
+
+# def p_expression_str_exp(t):
+#     'expression : string_exp'
+#     t[0] = t[1]
 
 def p_boolean_op(t):
     '''
@@ -470,10 +467,15 @@ def p_in_list(t):
         | string_exp IN list
         | STRING IN list
         | list IN list
-        | string_exp IN STRING
+        | string_exp IN string_exp
         | STRING IN STRING
+        | expression IN STRING
     '''
-    t[0] = InList(t[1], t[3])
+    if not isinstance(t[3], StringNode) or isinstance(t[1], StringNode):
+        t[0] = InList(t[1], t[3])
+    else:
+        p_error(t)
+
 
 def p_error(t):
     print("SYNTAX ERROR")
@@ -486,14 +488,13 @@ yacc.yacc()
 
 
 file = open(sys.argv[1], 'r')
-# file = open('Tests/input_30.txt', 'r')
+# file = open('Tests/input_18.txt', 'r')
 
 lines = file.readlines()
 # print(lines)
 code = ""
 debug_toke_list = []
 for line in lines:
-    # if len(line) < 2: continue
     code = line.strip()
     try:
         lex.input(code)
@@ -501,18 +502,11 @@ for line in lines:
             token = lex.token()
             debug_toke_list.append(token)
             if not token: break
-            # print(token)
-        # print(code)
-        ast = yacc.parse(code, debug=0)
-        # ast = yacc.parse(code)
-
-        ast.execute()
     except Exception:
         error = traceback.format_exc()
         # print("ERROR")
     else:
         error = ""
     finally:
-        # print(debug_toke_list)
-        # print(error)
-        exit(0)
+        ast = yacc.parse(code, debug=0)
+        ast.execute()
