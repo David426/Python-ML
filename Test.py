@@ -28,7 +28,7 @@ for i in range(start, stop):
     sbmlOutput = os.popen(function + input + i.__str__() + extension).read()
     sbmlOutput = sbmlOutput[:len(sbmlOutput)-1]
     print(sbmlOutput)
-    if sbmlOutput == expectedOutput:
+    if sbmlOutput.lower() == expectedOutput.lower():
         count += 1
         print("CORRECT: " + count.__str__() + '/' + attempted.__str__())
     else:

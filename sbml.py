@@ -252,7 +252,7 @@ def t_STRING(t):
     return t
 
 def t_TRUE(t):
-    'True'
+    'true'
     t.value = BooleanNode(t.value)
     return t
 
@@ -289,10 +289,14 @@ precedence = (
     ('left', 'AND'),
     ('left', 'NOT'),
     ('left', 'EQUAL', 'NOTEQUAL', 'GREATER', 'GREATEROREQUAL', 'LESS', 'LESSOREQUAL'),
+    ('left', 'CONS'),
+    ('left', 'IN'),
     ('left', 'PLUS', 'MINUS'),
-    ('left', 'TIMES', 'DIVIDE', 'DIV'),
+    ('left', 'TIMES', 'DIVIDE', 'DIV', 'MOD'),
     ('right', 'POWER'),
+    ('left', 'LIST_INDEX'),
     ('left', 'EOP'),
+    ('left', 'PARENTHESIS'),
     ('right', 'UMINUS')
 )
 
@@ -309,9 +313,14 @@ def p_string_exp(t):
 
     t[0] = ExecuteStatmentNode(t[1])
 
+# def p_string_exp_string(t):
+#     '''
+#     string_exp : STRING
+#     '''
+#     t[0] = t[1]
 def p_parenthesis(t):
     '''
-    factor : LPAREN expression RPAREN
+    factor : LPAREN expression RPAREN %prec PARENTHESIS
     '''
     t[0] = t[2]
 
@@ -324,7 +333,6 @@ def p_concat(t):
 
 def p_string_expression(t):
     'string_exp : STRING'
-    t[0] = t[1]
     t[0] = t[1]
 
 def p_expression_op(t):
@@ -372,11 +380,13 @@ def p_comparison(t):
             | expression GREATEROREQUAL factor
             | expression LESSOREQUAL factor
             | expression EQUAL factor
+            | expression NOTEQUAL factor
             | string_exp GREATER string_exp
             | string_exp LESS string_exp
             | string_exp GREATEROREQUAL string_exp
             | string_exp LESSOREQUAL string_exp
             | string_exp EQUAL string_exp
+            | string_exp NOTEQUAL string_exp
 
     '''
     t[0] = ComparisonNode(t[2], t[1], t[3])
@@ -434,14 +444,15 @@ def p_list(t):
 
 def p_index(t):
     '''
-    expression : list LBRACE expression RBRACE
-        | string_exp LBRACE expression RBRACE
-        | expression LBRACE expression RBRACE
+    expression : list LBRACE expression RBRACE %prec LIST_INDEX
+        | string_exp LBRACE expression RBRACE %prec LIST_INDEX
+        | expression LBRACE expression RBRACE %prec LIST_INDEX
     '''
     if isinstance(t[1], ListNode) or isinstance(t[1], StringNode):
         t[0] = t[1].get(t[3])
     else:
         p_error(t)
+
 def p_cons(t):
     '''
     list : expression CONS list
@@ -475,7 +486,7 @@ yacc.yacc()
 
 
 file = open(sys.argv[1], 'r')
-# file = open('Tests/input_18.txt', 'r')
+# file = open('Tests/input_30.txt', 'r')
 
 lines = file.readlines()
 # print(lines)
@@ -498,7 +509,7 @@ for line in lines:
         ast.execute()
     except Exception:
         error = traceback.format_exc()
-        print("ERROR")
+        # print("ERROR")
     else:
         error = ""
     finally:
