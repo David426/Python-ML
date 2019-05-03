@@ -30,6 +30,25 @@ class BlockNode(Node):
             statement.evaluate()
 
 
+class IfNode(Node):
+    def __init__(self, condition, true_block, false_block):
+        self.condition = condition
+        self.true_block = true_block
+        if false_block is None:
+            self.false_block = BlockNode(None)
+        else:
+            self.false_block = false_block
+        self.return_type = BlockNode
+
+    def evaluate(self):
+        if self.condition.return_type is not BooleanNode:
+            raise SyntaxException("If requires conditional statement")
+        else:
+            if self.condition.evaluate():
+                self.true_block.evaluate()
+            else:
+                self.false_block.evaluate()
+
 class ExecuteStatmentNode(Node):
     def __init__(self, v):
         self.value = v
@@ -342,7 +361,7 @@ class RessaginmentNode(Node):
 class VariableNode(Node):
     def __init__(self, id, value):
         self.id = id
-        lex.vars.append(self)
+        lex.vars.update({self.id : self})
         if value is None:
             self.initialized = False
             self.return_type = VariableNode
@@ -385,7 +404,7 @@ reserved = {
     'print': 'PRINT',
     'if': 'IF',
     'else': "ELSE",
-    'e':"EOP"
+    'e' :"EOP",
 }
 
 tokens = [
@@ -425,10 +444,6 @@ def t_RESERVED(t):
     t.type = reserved.get(t.value, 'ID')
     return t
 
-# def t_VARIABLE(t):
-#     r'[A-Za-z][A-Za-z0-9_]*'
-#     t.value = StringNode(t.value)
-#     # print("yay")
 
 def t_STRING(t):
     r'\"([^\"\'])*\"|\'([^\'\"])*\''
@@ -481,6 +496,19 @@ def p_block(p):
      block : L_CURLY statement_list R_CURLY
     '''
     p[0] = BlockNode(p[2])
+
+def p_if_else(p):
+    '''
+    statement : IF LPAREN expression RPAREN block ELSE block
+    '''
+    p[0] = IfNode(p[3], p[5], p[7])
+
+def p_if(p):
+    '''
+    statement : IF LPAREN expression RPAREN block
+    '''
+    p[0] = IfNode(p[3], p[5], None)
+
 
 def p_statement_list(p):
     '''
@@ -571,6 +599,7 @@ def p_expression(p):
     | var
     '''
     p[0] = p[1]
+
 def p_variable(p):
     '''
     var : ID
@@ -578,10 +607,7 @@ def p_variable(p):
     if p[1] not in lex.vars:
         p[0] = VariableNode(p[1], None)
     else:
-        for var in lex.vars:
-            if var.id == p[1]:
-                p[0] = var
-                break
+        p[0] = lex.vars.get(p[1])
 
 def p_initialization(p):
     '''
@@ -590,10 +616,7 @@ def p_initialization(p):
     if p[1] not in lex.vars:
         p[0] = VariableNode(p[1], p[3])
     else:
-        for var in lex.vars:
-            if var.id == p[1]:
-                p[0] = RessaginmentNode(var, p[3])
-                break
+        p[0] = RessaginmentNode(lex.vars.get(p[1]), p[3])
 
 def p_list_elms(p):
     '''
@@ -670,7 +693,7 @@ class SyntaxException(Exception):
 
 
 lex = ply.lex.lex()
-lex.vars = []
+lex.vars = {}
 yacc = ply.yacc.yacc()
 
 if (len(sys.argv) != 2):

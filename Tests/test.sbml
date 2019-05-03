@@ -1,5 +1,13 @@
 {
-    listVar = [1, 2, 3, 4];
-    print(listVar[2]);
+    var = 0;
+    boolVar = True;
+    if(20 > 1) {
+        var = 20;
+    }else{
+        print("False!");
+    }
+    print(var);
+    print(boolVar);
+
 
 }
