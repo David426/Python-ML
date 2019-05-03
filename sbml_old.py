@@ -209,7 +209,6 @@ class InList(Node):
         self.list = list
 
     def evaluate(self):
-        # print("Item: " + self.item.__str__ + " List: " + self.list.__str__)
         return self.item.evaluate() in self.list.evaluate()
 
 class VariableNode(Node):
