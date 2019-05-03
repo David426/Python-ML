@@ -49,6 +49,20 @@ class IfNode(Node):
             else:
                 self.false_block.evaluate()
 
+
+class WhileNode(Node):
+    def __init__(self, condition, block):
+        self.condition = condition
+        self.block = block
+
+    def evaluate(self):
+        if self.condition.return_type is not BooleanNode:
+            raise SyntaxException("If requires conditional statement")
+        else:
+            while(self.condition.evaluate()):
+                self.block.evaluate()
+
+
 class ExecuteStatmentNode(Node):
     def __init__(self, v):
         self.value = v
@@ -347,39 +361,46 @@ class StringNode(Node):
         return self.v
 
 class RessaginmentNode(Node):
-    def __init__(self, var, value):
-        self.var = var
-        self.v1 = value
-        self.return_type = self.v1.return_type
+    def __init__(self, id, value):
+        self.id = id
+        stack.update({self.id : value})
+        self.return_type = stack[self.id].return_type
 
     def evaluate(self):
-        self.var.initialized = True
-        self.var.v1 = self.v1
-        return self.var
+        return stack[self.id].evaluate()
 
+class GetVariableNode(Node):
+    def __init__(self, id):
+        self.id = id
+        self.return_type = stack[self.id].return_type
+    def evaluate(self):
+        if not self.id in stack:
+            raise SemanticException("cant find var id")
+        else:
+            return stack[self.id].evaluate()
 
 class VariableNode(Node):
     def __init__(self, id, value):
         self.id = id
-        lex.vars.update({self.id : self})
+        stack.update({self.id : value})
         if value is None:
             self.initialized = False
             self.return_type = VariableNode
         else:
-            self.v1 = value
+
             self.initialized = True
-            self.return_type = self.v1.return_type
+            self.return_type = stack[self.id].return_type
 
     def get(self, index):
-        if self.v1.return_type is ListNode or StringNode:
-            return self.v1.get(index)
+        if stack[self.id].return_type is ListNode or StringNode:
+            return stack[self.id].get(index)
         else:
             raise SyntaxException("GET Expects List or string")
 
 
     def evaluate(self):
         if self.initialized:
-            return self.v1.evaluate()
+            return stack[self.id].evaluate()
         else:
             raise SyntaxError("Unassigned var")
 
@@ -403,6 +424,7 @@ reserved = {
     'False': 'FALSE',
     'print': 'PRINT',
     'if': 'IF',
+    'while' : 'WHILE',
     'else': "ELSE",
     'e' :"EOP",
 }
@@ -496,6 +518,12 @@ def p_block(p):
      block : L_CURLY statement_list R_CURLY
     '''
     p[0] = BlockNode(p[2])
+
+def p_while(p):
+    '''
+    statement : WHILE LPAREN expression RPAREN block
+    '''
+    p[0] = WhileNode(p[3], p[5])
 
 def p_if_else(p):
     '''
@@ -604,19 +632,19 @@ def p_variable(p):
     '''
     var : ID
     '''
-    if p[1] not in lex.vars:
+    if p[1] not in stack:
         p[0] = VariableNode(p[1], None)
     else:
-        p[0] = lex.vars.get(p[1])
+        p[0] = stack.get(p[1])
 
 def p_initialization(p):
     '''
     var : ID ASSIGNMENT expression
     '''
-    if p[1] not in lex.vars:
+    if p[1] not in stack:
         p[0] = VariableNode(p[1], p[3])
     else:
-        p[0] = RessaginmentNode(lex.vars.get(p[1]), p[3])
+        p[0] = RessaginmentNode(p[1], p[3])
 
 def p_list_elms(p):
     '''
@@ -693,7 +721,7 @@ class SyntaxException(Exception):
 
 
 lex = ply.lex.lex()
-lex.vars = {}
+stack = {}
 yacc = ply.yacc.yacc()
 
 if (len(sys.argv) != 2):
