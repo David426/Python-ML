@@ -2,6 +2,10 @@
 # 111486160
 # CSE 307
 
+import ply.yacc
+import ply.lex
+import sys
+
 # -------------------------------------------
 #               Nodes
 # -------------------------------------------
@@ -176,6 +180,7 @@ class ComparisonNode(Node):
         else:
             raise SyntaxException("Operands Cannot use ==")
 
+
 class BooleanOpNode(Node):
     def __init__(self, op, v1, v2):
         self.v1 = v1
@@ -190,6 +195,7 @@ class BooleanOpNode(Node):
             return self.v1.evaluate() and self.v2.evaluate()
         elif self.op == 'orelse':
             return self.v1.evaluate() or self.v2.evaluate()
+
 
 class NotOpNode(Node):
     def __init__(self, v1):
@@ -321,26 +327,48 @@ class StringNode(Node):
     def evaluate(self):
         return self.v
 
-
-class VariableNode(Node):
-    def __init__(self, id):
-        self.id = id
-        self.v = None
-        self.initialized = False
-
-    def assign_value(self, v):
-        self.initialized = True
-        self.v = v
-
-    def is_initialized(self):
-        return self.initialized
+class RessaginmentNode(Node):
+    def __init__(self, var, value):
+        self.var = var
+        self.v1 = value
+        self.return_type = self.v1.return_type
 
     def evaluate(self):
-        if self.is_initialized():
-            return self.v.evaluate()
-        else:
-            p_semantic_error(self)
+        self.var.initialized = True
+        self.var.v1 = self.v1
+        return self.var
 
+
+class VariableNode(Node):
+    def __init__(self, id, value):
+        self.id = id
+        lex.vars.append(self)
+        if value is None:
+            self.initialized = False
+            self.return_type = VariableNode
+        else:
+            self.v1 = value
+            self.initialized = True
+            self.return_type = self.v1.return_type
+
+    def get(self, index):
+        if self.v1.return_type is ListNode or StringNode:
+            return self.v1.get(index)
+        else:
+            raise SyntaxException("GET Expects List or string")
+
+
+    def evaluate(self):
+        if self.initialized:
+            return self.v1.evaluate()
+        else:
+            raise SyntaxError("Unassigned var")
+
+    def __eq__(self, other):
+        if self.id == other:
+            return True
+        else:
+            return False
 
 # ------------------------------------
 #           Building Lex
@@ -431,6 +459,8 @@ def t_error(t):
 
 precedence = (
     ('left', 'LBRACE', 'RBRACE'),
+    ('left', 'ID'),
+    ('right', 'ASSIGNMENT'),
     ('left', 'OR'),
     ('left', 'AND'),
     ('left', 'NOT'),
@@ -452,13 +482,11 @@ def p_block(p):
     '''
     p[0] = BlockNode(p[2])
 
-
 def p_statement_list(p):
     '''
      statement_list : statement_list statement
     '''
     p[0] = p[1] + [p[2]]
-
 
 def p_statement_list_val(p):
     '''
@@ -466,12 +494,11 @@ def p_statement_list_val(p):
     '''
     p[0] = [p[1]]
 
-
 def p_statement(p):
     '''
-        statement : expression
+        statement : expression SEMICOLON
     '''
-    p[0] = [p[1]]
+    p[0] = p[1]
 
 def p_parentheses(p):
     '''
@@ -485,7 +512,6 @@ def p_print_statement(p):
     '''
     p[0] = PrintNode(p[3])
 
-
 def p_expression_op(p):
     '''expression : expression PLUS expression
                   | expression MINUS expression
@@ -496,7 +522,6 @@ def p_expression_op(p):
                   | expression POWER expression
                    '''
     p[0] = OpNode(p[2], p[1], p[3])
-
 
 def p_comparison(p):
     '''
@@ -538,15 +563,37 @@ def p_in_list(p):
     '''
     p[0] = InListNode(p[1], p[3])
 
-
 def p_expression(p):
     '''expression : factor
     | STRING
     | boolean
     | list
+    | var
     '''
     p[0] = p[1]
+def p_variable(p):
+    '''
+    var : ID
+    '''
+    if p[1] not in lex.vars:
+        p[0] = VariableNode(p[1], None)
+    else:
+        for var in lex.vars:
+            if var.id == p[1]:
+                p[0] = var
+                break
 
+def p_initialization(p):
+    '''
+    var : ID ASSIGNMENT expression
+    '''
+    if p[1] not in lex.vars:
+        p[0] = VariableNode(p[1], p[3])
+    else:
+        for var in lex.vars:
+            if var.id == p[1]:
+                p[0] = RessaginmentNode(var, p[3])
+                break
 
 def p_list_elms(p):
     '''
@@ -559,11 +606,9 @@ def p_list_elms(p):
         p[1].append(p[2])
         p[0] = p[1]
 
-
 def p_list_elms_comma(p):
     'list_element : list_element COMMA'
     p[0] = p[1]
-
 
 def p_list(p):
     '''
@@ -574,7 +619,6 @@ def p_list(p):
         p[0] = p[2]
     else:
         p[0] = ListNode(None)
-
 
 def p_boolean(p):
     '''
@@ -595,11 +639,9 @@ def p_factor_number(p):
     'factor : NUMBER'
     p[0] = p[1]
 
-
 def p_error(t):
     print("SYNTAX ERROR")
     return
-
 
 def p_semantic_error(t):
     print("SEMANTIC ERROR")
@@ -610,9 +652,7 @@ def p_semantic_error(t):
 #               Main
 # -------------------------------------------
 
-import ply.yacc
-import ply.lex
-import sys
+
 
 
 class SemanticException(Exception):
@@ -630,6 +670,7 @@ class SyntaxException(Exception):
 
 
 lex = ply.lex.lex()
+lex.vars = []
 yacc = ply.yacc.yacc()
 
 if (len(sys.argv) != 2):
