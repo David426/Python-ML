@@ -1,5 +1,10 @@
-# David Sill 111486160
-# Assigment HW 3 CSE 307
+# David Sill
+# 111486160
+# CSE 307
+
+# -------------------------------------------
+#               Nodes
+# -------------------------------------------
 
 class Node:
     def __init__(self):
@@ -12,29 +17,14 @@ class Node:
         return 0
 
 
-class NumberNode(Node):
-    def __init__(self, v):
-        if ('.' in v):
-            self.value = float(v)
-        else:
-            self.value = int(v)
+class BlockNode(Node):
+    def __init__(self, sl):
+        self.statementList = sl
 
     def evaluate(self):
-        return self.value
+        for statement in self.statementList:
+            statement.evaluate()
 
-
-class NegateNode(Node):
-    def __init__(self, v):
-        self.value = v
-    def evaluate(self):
-        return self.value.evaluate() * -1
-
-class EOPNode(Node):
-    def __init__(self, v1, v2):
-        self.v1 = v1
-        self.v2 = v2
-    def evaluate(self):
-        return self.v1.evaluate() * (10 ** self.v2.evaluate())
 
 class ExecuteStatmentNode(Node):
     def __init__(self, v):
@@ -48,38 +38,80 @@ class ExecuteStatmentNode(Node):
             print(self.value)
 
 
+class PrintNode(Node):
+    def __init__(self, e):
+        self.e = e
+    def evaluate(self):
+        print(self.e.evaluate())
+
+
 class OpNode(Node):
     def __init__(self, op, v1, v2):
         self.v1 = v1
         self.v2 = v2
         self.op = op
+        if not self.v1.return_type is self.v2.return_type:
+            raise SyntaxException("Mixed Operands")
+        self.return_type = v1.return_type
 
     def evaluate(self):
         if self.op == '+':
-            return self.v1.evaluate() + self.v2.evaluate()
-        elif (self.op == '-'):
-            return self.v1.evaluate() - self.v2.evaluate()
-        elif (self.op == '*'):
-            return self.v1.evaluate() * self.v2.evaluate()
-        elif (self.op == '/'):
-            return self.v1.evaluate() / self.v2.evaluate()
-        elif (self.op == 'div'):
-            return self.v1.evaluate() // self.v2.evaluate()
-        elif (self.op == 'mod'):
-            return self.v1.evaluate() % self.v2.evaluate()
-        elif (self.op == '**'):
-            return self.v1.evaluate() ** self.v2.evaluate()
+            return self.plus()
+        elif self.op == '-':
+            return self.minus()
+        elif self.op == '*':
+            return self.multiply()
+        elif self.op == '/':
+            return self.divide()
+        elif self.op == 'div':
+            return self.div()
+        elif self.op == 'mod':
+            return self.mod
+        elif self.op == '**':
+            return self.power()
 
-class IsEqualNode(Node):
-    def __init__(self, op, v1, v2):
-        self.v1 = v1
-        self.v2 = v2
-        self.op = op
-    def evaluate(self):
-        if(self.op == '=='):
-            return self.v1.evaluate() == self.v2.evaluate()
-        elif(self.op == ',>'):
-            return self.v1.evaluate() != self.v2.evaluate()
+    def plus(self):
+        # if isinstance(self.v1.return_type, (NumberNode, StringNode)):
+        if self.v1.return_type is NumberNode or StringNode:
+            return self.v1.evaluate() + self.v2.evaluate()
+        else:
+            raise SyntaxException("Operands Cannot use +")
+
+    def minus(self):
+        if self.v1.return_type is NumberNode:
+            return self.v1.evaluate() - self.v2.evaluate()
+        else:
+            raise SyntaxException("Operands Cannot use -")
+
+    def multiply(self):
+        if self.v1.return_type is NumberNode:
+            return self.v1.evaluate() * self.v2.evaluate()
+        else:
+            raise SyntaxException("Operands Cannot use *")
+
+    def divide(self):
+        if self.v1.return_type is NumberNode:
+            return self.v1.evaluate() / self.v2.evaluate()
+        else:
+            raise SyntaxException("Operands Cannot use /")
+
+    def div(self):
+        if self.v1.return_type is NumberNode:
+            return self.v1.evaluate() // self.v2.evaluate()
+        else:
+            raise SyntaxException("Operands Cannot use div")
+    def mod(self):
+        if self.v1.return_type is NumberNode:
+            return self.v1.evaluate() % self.v2.evaluate()
+        else:
+            raise SyntaxException("Operands Cannot use mod")
+
+    def power(self):
+        if self.v1.return_type is NumberNode:
+            return self.v1.evaluate() ** self.v2.evaluate()
+        else:
+            raise SyntaxException("Operands Cannot use **")
+
 
 class ComparisonNode(Node):
     def __init__(self, op, v1, v2):
@@ -87,76 +119,53 @@ class ComparisonNode(Node):
         self.v2 = v2
         self.op = op
 
+        if not self.v1.return_type is self.v2.return_type:
+            raise SyntaxException("Mixed Operands")
+        self.return_type = BooleanNode
+
+
     def evaluate(self):
-        if (self.op == '>'):
+        if self.op == '>':
+            return self.greater()
+        elif self.op == '<':
+            return self.less()
+        elif self.op == '>=':
+            return self.greater_or_equal()
+        elif self.op == '<=':
+            return self.less_or_equal()
+        elif self.op == '==':
+            return self.equal()
+
+    def greater(self):
+        if isinstance(self.v1.return_type, (NumberNode, StringNode)):
             return self.v1.evaluate() > self.v2.evaluate()
-        elif (self.op == '<'):
+        else:
+            raise SyntaxException("Operands Cannot use >")
+
+    def less(self):
+        if isinstance(self.v1.return_type, (NumberNode, StringNode)):
             return self.v1.evaluate() < self.v2.evaluate()
-        elif (self.op == '>='):
+        else:
+            raise SyntaxException("Operands Cannot use <")
+
+    def greater_or_equal(self):
+        if isinstance(self.v1.return_type, (NumberNode, StringNode)):
             return self.v1.evaluate() >= self.v2.evaluate()
-        elif (self.op == '<='):
+        else:
+            raise SyntaxException("Operands Cannot use >=")
+
+    def less_or_equal(self):
+        if isinstance(self.v1.return_type, (NumberNode, StringNode)):
             return self.v1.evaluate() <= self.v2.evaluate()
-        elif (self.op == '=='):
+        else:
+            raise SyntaxException("Operands Cannot use <=")
+
+    def equal(self):
+        if isinstance(self.v1.return_type, (NumberNode, StringNode)):
             return self.v1.evaluate() == self.v2.evaluate()
-
-
-class BooleanNode(Node):
-    def __init__(self, v):
-        if 'true' == v:
-            self.value = True
         else:
-            self.value = False
+            raise SyntaxException("Operands Cannot use ==")
 
-    def evaluate(self):
-        return self.value
-
-class NotBooleanNode(Node):
-    def __init__(self, v):
-        self.value = v
-
-    def evaluate(self):
-        if self.value.evaluate():
-            return False
-        else:
-            return True
-
-class BooleanOpNode(Node):
-    def __init__(self, op, v1, v2):
-        self.v1 = v1
-        self.v2 = v2
-        self.op = op
-
-    def evaluate(self):
-        if (self.op == 'andalso'):
-            return self.v1.evaluate() and self.v2.evaluate()
-        elif (self.op == 'orelse'):
-            return self.v1.evaluate() or self.v2.evaluate()
-
-
-class StringNode(Node):
-    def __init__(self, v):
-        if v[0] == '\'' or v[0] == '\"':
-            self.v = v[1:len(v)-1]
-        else:
-            self.v = v
-
-    def output(self):
-        return '\'' + self.value + '\''
-
-    def get(self, index):
-        return StringNode(self.v[index.evaluate()])
-
-    def evaluate(self):
-        return self.v
-
-
-class ConcatNode(Node):
-    def __init__(self, s1, s2):
-        self.s1 = s1
-        self.s2 = s2
-
-    def evaluate(self):
-        return self.s1.evaluate() + self.s2.evaluate()
 
 class ListNode(Node):
     def __init__(self, v):
@@ -164,7 +173,7 @@ class ListNode(Node):
             self.v = [v]
         else:
             self.v = []
-
+        self.return_type = ListNode
     def append(self, elm):
         self.v.append(elm)
 
@@ -180,61 +189,101 @@ class ListNode(Node):
             l.append(node.evaluate())
         return l
 
-
-class InList(Node):
-
-    def __init__(self, item, list):
-        self.item = item
-        self.list = list
+class NumberNode(Node):
+    def __init__(self, v):
+        if ('.' in v):
+            self.value = float(v)
+        else:
+            self.value = int(v)
+        self.return_type = NumberNode
 
     def evaluate(self):
-        # print("Item: " + self.item.__str__ + " List: " + self.list.__str__)
-        return self.item.evaluate() in self.list.evaluate()
+        return self.value
 
-import ply.lex as lex
-import ply.yacc as yacc
-import sys
-import traceback
-import string
+class BooleanNode(Node):
+    def __init__(self, v):
+        if 'True' == v:
+            self.value = True
+        else:
+            self.value = False
+        self.return_type = BooleanNode
+
+    def evaluate(self):
+        return self.value
+
+class StringNode(Node):
+    def __init__(self, v):
+        if v[0] == '\'' or v[0] == '\"':
+            self.v = v[1:len(v)-1]
+        else:
+            self.v = v
+        self.return_type = StringNode
+
+    def output(self):
+        return '\'' + self.value + '\''
+
+    def get(self, index):
+        return StringNode(self.v[index.evaluate()])
+
+    def evaluate(self):
+        return self.v
+
+class VariableNode(Node):
+    def __init__(self, id):
+        self.id = id
+        self.v = None
+        self.initialized = False
+
+    def assign_value(self, v):
+        self.initialized = True
+        self.v = v
+    def is_initialized(self):
+        return self.initialized
+
+    def evaluate(self):
+        if self.is_initialized():
+            return self.v.evaluate()
+        else:
+            p_semantic_error(self)
+
 
 # ------------------------------------
 #           Building Lex
 # ------------------------------------
-
 reserved = {
     'mod' : 'MOD',
+    'div' : 'DIV',
     'andalso' : 'AND',
     'orelse' : 'OR',
     'in' : 'IN',
     'not' : 'NOT',
-    'true': 'TRUE',
-    'false' : 'FALSE'
+    'True': 'TRUE',
+    'False' : 'FALSE',
+    'print' : 'PRINT',
+    'if' : 'IF',
+    'else' : "ELSE"
  }
 
 tokens = [
-    'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'COMMA', 'SEMICOLON',
-    'NUMBER', 'EOP', 'STRING',
-    'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'DIV', 'POWER', 'CONS', 'POUND',
+    'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'R_CURLY', 'L_CURLY', 'COMMA', 'SEMICOLON',
+    'NUMBER', 'EOP', 'STRING', 'ID', 'ASSIGNMENT',
+    'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'POWER', 'CONS', 'POUND',
     'GREATER', 'LESS', 'EQUAL', 'GREATEROREQUAL', 'LESSOREQUAL', 'NOTEQUAL'
 ] + list(reserved.values())
 
 #Tokens
-t_MOD = 'mod'
-t_AND = 'andalso'
-t_OR = 'orelse'
-t_IN = 'in'
-t_NOT = 'not'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_LBRACE = r'\['
 t_RBRACE = r'\]'
+t_L_CURLY = r'\{'
+t_R_CURLY = r'\}'
 t_COMMA = r','
 t_SEMICOLON = r'\;'
 t_PLUS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
 t_DIVIDE = r'/'
-t_DIV = 'div'
 t_POWER = r'\*\*'
 t_CONS = r'::'
 t_POUND = r'\#'
@@ -245,6 +294,13 @@ t_GREATEROREQUAL = r'>='
 t_LESSOREQUAL = r'<='
 t_NOTEQUAL = r'<>'
 t_EOP = r'e'
+t_ASSIGNMENT = r'='
+
+
+def t_ID(t):
+    '[A-Za-z][A-Za-z0-9_]*'
+    t.type = reserved.get(t.value, 'ID')
+    return t
 
 def t_STRING(t):
     r'\"([^\"\'])*\"|\'([^\'\"])*\''
@@ -252,12 +308,12 @@ def t_STRING(t):
     return t
 
 def t_TRUE(t):
-    'true'
+    'True'
     t.value = BooleanNode(t.value)
     return t
 
 def t_FALSE(t):
-    'false'
+    'False'
     t.value = BooleanNode(t.value)
     return t
 
@@ -277,8 +333,6 @@ t_ignore = " \t\n"
 def t_error(t):
     print("Syntax error at '%s'" % t.value)
 
-lex.lex()
-
 # -------------------------------------------
 #               Parsing
 # -------------------------------------------
@@ -294,44 +348,43 @@ precedence = (
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE', 'DIV', 'MOD'),
     ('right', 'POWER'),
-    ('left', 'LIST_INDEX'),
-    ('left', 'EOP'),
-    # ('right', 'PARENTHESIS'),
-    ('right', 'UMINUS')
+    # ('left', 'LIST_INDEX'),
+    ('left', 'EOP')
+    # ('right', 'UMINUS')
 )
 
-def p_statement_exp(t):
-    '''statement : expression SEMICOLON
-         | boolean SEMICOLON
-         | list SEMICOLON
+def p_block(p):
     '''
-    t[0] = ExecuteStatmentNode(t[1])
-
-def p_string_exp(t):
-    '''statement : string_exp SEMICOLON
+     block : L_CURLY statement_list R_CURLY
     '''
+    p[0] = BlockNode(p[2])
 
-    t[0] = ExecuteStatmentNode(t[1])
 
-def p_parenthesis(t):
+def p_statement_list(p):
     '''
-    expression : LPAREN expression RPAREN
-    string_exp : LPAREN string_exp RPAREN
+     statement_list : statement_list statement
     '''
-    t[0] = t[2]
+    p[0] = p[1] + [p[2]]
 
-def p_concat(t):
+def p_statement_list_val(p):
     '''
-    string_exp : string_exp PLUS string_exp
-    list :  list PLUS list
+    statement_list : statement
     '''
-    t[0] = ConcatNode(t[1], t[3])
+    p[0] = [p[1]]
 
-def p_string_expression(t):
-    'string_exp : STRING'
-    t[0] = t[1]
+def p_statement(p):
+    '''
+        statement : expression
+    '''
+    p[0] = [p[1]]
 
-def p_expression_op(t):
+def p_print_statement(p):
+    '''
+    statement : PRINT LPAREN expression RPAREN SEMICOLON
+    '''
+    p[0] = PrintNode(p[3])
+
+def p_expression_op(p):
     '''expression : expression PLUS expression
                   | expression MINUS expression
                   | expression TIMES expression
@@ -340,34 +393,9 @@ def p_expression_op(t):
                   | expression MOD expression
                   | expression POWER expression
                    '''
-    t[0] = OpNode(t[2], t[1], t[3])
+    p[0] = OpNode(p[2], p[1], p[3])
 
-
-def p_expr_uminus(t):
-    'factor : MINUS expression %prec UMINUS'
-    t[0] = NegateNode(t[2])
-
-def p_EOP(t):
-    '''expression : expression EOP expression'''
-    t[0] = EOPNode(t[1], t[3])
-
-def p_expression_factor(t):
-    '''expression : factor'''
-    t[0] = t[1]
-
-
-def p_factor_number(t):
-    'factor : NUMBER'
-    t[0] = t[1]
-
-def p_equal(t):
-    '''
-    boolean : boolean EQUAL boolean
-        | boolean NOTEQUAL boolean
-    '''
-    t[0] = IsEqualNode(t[2], t[1], t[3])
-
-def p_comparison(t):
+def p_comparison(p):
     '''
     boolean : expression GREATER expression
             | expression LESS expression
@@ -375,106 +403,52 @@ def p_comparison(t):
             | expression LESSOREQUAL expression
             | expression EQUAL expression
             | expression NOTEQUAL expression
-            | string_exp GREATER string_exp
-            | string_exp LESS string_exp
-            | string_exp GREATEROREQUAL string_exp
-            | string_exp LESSOREQUAL string_exp
-            | string_exp EQUAL string_exp
-            | string_exp NOTEQUAL string_exp
     '''
-    t[0] = ComparisonNode(t[2], t[1], t[3])
+    p[0] = ComparisonNode(p[2], p[1], p[3])
 
-# def p_expression_str_exp(t):
-#     'expression : string_exp'
-#     t[0] = t[1]
-
-def p_boolean_op(t):
+def p_expression(p):
+    '''expression : factor
+    | STRING
+    | boolean
+    | list
     '''
-    boolean : boolean AND boolean
-        | boolean OR boolean
-    '''
-    t[0] = BooleanOpNode(t[2], t[1], t[3])
+    p[0] = p[1]
 
-def p_boolean_not(t):
-    'boolean : NOT boolean'
-    t[0] = NotBooleanNode(t[2])
-
-def p_boolean(t):
-    '''
-    boolean : TRUE
-        | FALSE
-    '''
-    t[0] = t[1]
-
-def p_list_elms(t):
+def p_list_elms(p):
     '''
     list_element : expression
-        | string_exp
-        | boolean
-        | list
+        | list_element expression
     '''
-    t[0] = ListNode(t[1])
+    if len(p) == 2:
+        p[0] = ListNode(p[1])
+    elif len(p) == 3:
+        p[1].append(p[2])
+        p[0] = p[1]
 
-def p_list_elms_cont(t):
-    '''
-    list_element : list_element expression
-    | list_element string_exp
-    | list_element boolean
-    | list_element list
-    '''
-    t[1].append(t[2])
-    t[0] = t[1]
-
-def p_list_elms_comma(t):
+def p_list_elms_comma(p):
     'list_element : list_element COMMA'
-    t[0] = t[1]
+    p[0] = p[1]
 
-def p_list(t):
+def p_list(p):
     '''
     list : LBRACE list_element RBRACE
         | LBRACE RBRACE
     '''
-    if(len(t) >= 4):
-        t[0] = t[2]
+    if(len(p) >= 4):
+        p[0] = p[2]
     else:
-        t[0] = ListNode(None)
+        p[0] = ListNode(None)
 
-def p_index(t):
+def p_boolean(p):
     '''
-    expression : list LBRACE expression RBRACE %prec LIST_INDEX
-        | string_exp LBRACE expression RBRACE %prec LIST_INDEX
-        | expression LBRACE expression RBRACE %prec LIST_INDEX
+    boolean : TRUE
+        | FALSE
     '''
-    if isinstance(t[1], ListNode) or isinstance(t[1], StringNode):
-        t[0] = t[1].get(t[3])
-    else:
-        p_error(t)
+    p[0] = p[1]
 
-def p_cons(t):
-    '''
-    list : expression CONS list
-        | boolean CONS list
-        | string_exp CONS list
-        | list CONS list
-    '''
-    t[3].prepend(t[1])
-    t[0] = t[3]
-
-def p_in_list(t):
-    '''
-    boolean : expression IN list
-        | boolean IN list
-        | string_exp IN list
-        | STRING IN list
-        | list IN list
-        | string_exp IN string_exp
-        | STRING IN STRING
-        | expression IN STRING
-    '''
-    if not isinstance(t[3], StringNode) or isinstance(t[1], StringNode):
-        t[0] = InList(t[1], t[3])
-    else:
-        p_error(t)
+def p_factor_number(p):
+    'factor : NUMBER'
+    p[0] = p[1]
 
 
 def p_error(t):
@@ -484,29 +458,42 @@ def p_error(t):
 def p_semantic_error(t):
     print("SEMANTIC ERROR")
 
-yacc.yacc()
+# -------------------------------------------
+#               Main
+# -------------------------------------------
+
+import ply.yacc
+import ply.lex
+import sys
+
+class SemanticException(Exception):
+    def __init__(self, message):
+        self.message = message
+    pass
 
 
-file = open(sys.argv[1], 'r')
-# file = open('Tests/input_18.txt', 'r')
+class SyntaxException(Exception):
+    def __init__(self, message):
+        self.message = message
+    pass
 
-lines = file.readlines()
-# print(lines)
-code = ""
-debug_toke_list = []
-for line in lines:
-    code = line.strip()
-    try:
-        lex.input(code)
-        while True:
-            token = lex.token()
-            debug_toke_list.append(token)
-            if not token: break
-    except Exception:
-        error = traceback.format_exc()
-        # print("ERROR")
-    else:
-        error = ""
-    finally:
-        ast = yacc.parse(code, debug=0)
-        ast.execute()
+lex = ply.lex.lex()
+yacc = ply.yacc.yacc()
+
+if (len(sys.argv) != 2):
+    sys.exit("invalid arguments")
+fd = open(sys.argv[1], 'r')
+code = fd.read()
+
+try:
+    lex.input(code)
+    while True:
+        token = lex.token()
+        if not token: break
+    ast = yacc.parse(code, debug=1)
+    ast.evaluate()
+except SemanticException as err:
+    print("SEMANTIC ERROR")
+except SyntaxException as err:
+    print("SYNTAX ERROR")
+    # print(err.message)
