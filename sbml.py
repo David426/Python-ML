@@ -278,7 +278,6 @@ class IndexNode(Node):
     def get_type(self):
         return (self.list.get(self.index)).return_type
 
-
 class ListNode(Node):
     def __init__(self, v):
         if v is not None:
@@ -363,33 +362,34 @@ class StringNode(Node):
 class RessaginmentNode(Node):
     def __init__(self, id, value):
         self.id = id
-        stack.update({self.id : value})
-        self.return_type = stack[self.id].return_type
+        self.value = value
+        self.return_type = stack[self.id+"_type"]
 
     def evaluate(self):
-        return stack[self.id].evaluate()
+        stack.update({self.id : self.value.evaluate()})
 
 class GetVariableNode(Node):
     def __init__(self, id):
         self.id = id
-        self.return_type = stack[self.id].return_type
+        self.return_type = stack[self.id+"_type"]
     def evaluate(self):
         if not self.id in stack:
             raise SemanticException("cant find var id")
         else:
-            return stack[self.id].evaluate()
+            return stack[self.id]
 
 class VariableNode(Node):
     def __init__(self, id, value):
         self.id = id
-        stack.update({self.id : value})
+        self.value = value
+        stack.update({self.id : None})
         if value is None:
             self.initialized = False
             self.return_type = VariableNode
         else:
-
             self.initialized = True
-            self.return_type = stack[self.id].return_type
+            self.return_type = self.value.return_type
+            stack.update({self.id+"_type": self.return_type})
 
     def get(self, index):
         if stack[self.id].return_type is ListNode or StringNode:
@@ -397,18 +397,8 @@ class VariableNode(Node):
         else:
             raise SyntaxException("GET Expects List or string")
 
-
     def evaluate(self):
-        if self.initialized:
-            return stack[self.id].evaluate()
-        else:
-            raise SyntaxError("Unassigned var")
-
-    def __eq__(self, other):
-        if self.id == other:
-            return True
-        else:
-            return False
+        stack.update({self.id: self.value.evaluate()})
 
 # ------------------------------------
 #           Building Lex
@@ -525,11 +515,6 @@ def p_while(p):
     '''
     p[0] = WhileNode(p[3], p[5])
 
-def p_if_else(p):
-    '''
-    statement : IF LPAREN expression RPAREN block ELSE block
-    '''
-    p[0] = IfNode(p[3], p[5], p[7])
 
 def p_if(p):
     '''
@@ -537,6 +522,12 @@ def p_if(p):
     '''
     p[0] = IfNode(p[3], p[5], None)
 
+
+def p_if_else(p):
+    '''
+    statement : IF LPAREN expression RPAREN block ELSE block
+    '''
+    p[0] = IfNode(p[3], p[5], p[7])
 
 def p_statement_list(p):
     '''
@@ -635,7 +626,7 @@ def p_variable(p):
     if p[1] not in stack:
         p[0] = VariableNode(p[1], None)
     else:
-        p[0] = stack.get(p[1])
+        p[0] = GetVariableNode(p[1])
 
 def p_initialization(p):
     '''
@@ -734,7 +725,7 @@ try:
     while True:
         token = lex.token()
         if not token: break
-    ast = yacc.parse(code, debug=1)
+    ast = yacc.parse(code, debug=0)
     ast.evaluate()
 except SemanticException as err:
     print("SEMANTIC ERROR")

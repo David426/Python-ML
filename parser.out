@@ -9,8 +9,8 @@ Grammar
 Rule 0     S' -> block
 Rule 1     block -> L_CURLY statement_list R_CURLY
 Rule 2     statement -> WHILE LPAREN expression RPAREN block
-Rule 3     statement -> IF LPAREN expression RPAREN block ELSE block
-Rule 4     statement -> IF LPAREN expression RPAREN block
+Rule 3     statement -> IF LPAREN expression RPAREN block
+Rule 4     statement -> IF LPAREN expression RPAREN block ELSE block
 Rule 5     statement_list -> statement_list statement
 Rule 6     statement_list -> statement
 Rule 7     statement -> expression SEMICOLON
@@ -61,7 +61,7 @@ COMMA                : 38
 CONS                 : 26
 DIV                  : 14
 DIVIDE               : 13
-ELSE                 : 3
+ELSE                 : 4
 EOP                  : 44
 EQUAL                : 21
 FALSE                : 42
@@ -97,7 +97,7 @@ error                :
 
 Nonterminals, with rules where they appear
 
-block                : 2 3 3 4 0
+block                : 2 3 4 4 0
 boolean              : 31
 expression           : 2 3 4 7 8 9 10 10 11 11 12 12 13 13 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23 24 24 25 26 26 27 27 28 28 35 36 37 44 44
 factor               : 29 43
@@ -130,8 +130,8 @@ state 2
     (5) statement_list -> . statement_list statement
     (6) statement_list -> . statement
     (2) statement -> . WHILE LPAREN expression RPAREN block
-    (3) statement -> . IF LPAREN expression RPAREN block ELSE block
-    (4) statement -> . IF LPAREN expression RPAREN block
+    (3) statement -> . IF LPAREN expression RPAREN block
+    (4) statement -> . IF LPAREN expression RPAREN block ELSE block
     (7) statement -> . expression SEMICOLON
     (9) statement -> . PRINT LPAREN expression RPAREN SEMICOLON
     (8) expression -> . LPAREN expression RPAREN
@@ -195,8 +195,8 @@ state 3
     (1) block -> L_CURLY statement_list . R_CURLY
     (5) statement_list -> statement_list . statement
     (2) statement -> . WHILE LPAREN expression RPAREN block
-    (3) statement -> . IF LPAREN expression RPAREN block ELSE block
-    (4) statement -> . IF LPAREN expression RPAREN block
+    (3) statement -> . IF LPAREN expression RPAREN block
+    (4) statement -> . IF LPAREN expression RPAREN block ELSE block
     (7) statement -> . expression SEMICOLON
     (9) statement -> . PRINT LPAREN expression RPAREN SEMICOLON
     (8) expression -> . LPAREN expression RPAREN
@@ -382,8 +382,8 @@ state 7
 
 state 8
 
-    (3) statement -> IF . LPAREN expression RPAREN block ELSE block
-    (4) statement -> IF . LPAREN expression RPAREN block
+    (3) statement -> IF . LPAREN expression RPAREN block
+    (4) statement -> IF . LPAREN expression RPAREN block ELSE block
 
     LPAREN          shift and go to state 46
 
@@ -2032,8 +2032,8 @@ state 45
 
 state 46
 
-    (3) statement -> IF LPAREN . expression RPAREN block ELSE block
-    (4) statement -> IF LPAREN . expression RPAREN block
+    (3) statement -> IF LPAREN . expression RPAREN block
+    (4) statement -> IF LPAREN . expression RPAREN block ELSE block
     (8) expression -> . LPAREN expression RPAREN
     (10) expression -> . expression PLUS expression
     (11) expression -> . expression MINUS expression
@@ -3934,8 +3934,8 @@ state 74
 
 state 75
 
-    (3) statement -> IF LPAREN expression . RPAREN block ELSE block
-    (4) statement -> IF LPAREN expression . RPAREN block
+    (3) statement -> IF LPAREN expression . RPAREN block
+    (4) statement -> IF LPAREN expression . RPAREN block ELSE block
     (10) expression -> expression . PLUS expression
     (11) expression -> expression . MINUS expression
     (12) expression -> expression . TIMES expression
@@ -4256,8 +4256,8 @@ state 82
 
 state 83
 
-    (3) statement -> IF LPAREN expression RPAREN . block ELSE block
-    (4) statement -> IF LPAREN expression RPAREN . block
+    (3) statement -> IF LPAREN expression RPAREN . block
+    (4) statement -> IF LPAREN expression RPAREN . block ELSE block
     (1) block -> . L_CURLY statement_list R_CURLY
 
     L_CURLY         shift and go to state 2
@@ -4292,23 +4292,23 @@ state 85
 
 state 86
 
-    (3) statement -> IF LPAREN expression RPAREN block . ELSE block
-    (4) statement -> IF LPAREN expression RPAREN block .
+    (3) statement -> IF LPAREN expression RPAREN block .
+    (4) statement -> IF LPAREN expression RPAREN block . ELSE block
 
+    R_CURLY         reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    WHILE           reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    IF              reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    PRINT           reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    LPAREN          reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    NOT             reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    STRING          reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    MINUS           reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    NUMBER          reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    TRUE            reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    FALSE           reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    LBRACE          reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
+    ID              reduce using rule 3 (statement -> IF LPAREN expression RPAREN block .)
     ELSE            shift and go to state 88
-    R_CURLY         reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    WHILE           reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    IF              reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    PRINT           reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    LPAREN          reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    NOT             reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    STRING          reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    MINUS           reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    NUMBER          reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    TRUE            reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    FALSE           reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    LBRACE          reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
-    ID              reduce using rule 4 (statement -> IF LPAREN expression RPAREN block .)
 
 
 state 87
@@ -4332,7 +4332,7 @@ state 87
 
 state 88
 
-    (3) statement -> IF LPAREN expression RPAREN block ELSE . block
+    (4) statement -> IF LPAREN expression RPAREN block ELSE . block
     (1) block -> . L_CURLY statement_list R_CURLY
 
     L_CURLY         shift and go to state 2
@@ -4341,21 +4341,21 @@ state 88
 
 state 89
 
-    (3) statement -> IF LPAREN expression RPAREN block ELSE block .
+    (4) statement -> IF LPAREN expression RPAREN block ELSE block .
 
-    R_CURLY         reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    WHILE           reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    IF              reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    PRINT           reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    LPAREN          reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    NOT             reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    STRING          reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    MINUS           reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    NUMBER          reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    TRUE            reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    FALSE           reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    LBRACE          reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
-    ID              reduce using rule 3 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    R_CURLY         reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    WHILE           reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    IF              reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    PRINT           reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    LPAREN          reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    NOT             reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    STRING          reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    MINUS           reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    NUMBER          reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    TRUE            reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    FALSE           reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    LBRACE          reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
+    ID              reduce using rule 4 (statement -> IF LPAREN expression RPAREN block ELSE block .)
 
 WARNING: 
 WARNING: Conflicts:
