@@ -47,7 +47,10 @@ class IfNode(Node):
             if self.condition.evaluate():
                 self.true_block.evaluate()
             else:
-                self.false_block.evaluate()
+                if self.false_block.statementList is not None:
+                    self.false_block.evaluate()
+                else:
+                    pass
 
 
 class WhileNode(Node):

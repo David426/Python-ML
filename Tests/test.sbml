@@ -8,7 +8,6 @@
         }
         i = i + 1;
     }
-    print(isPrime);
     if(isPrime==1){
          print("isPrime is true");
     } else {
